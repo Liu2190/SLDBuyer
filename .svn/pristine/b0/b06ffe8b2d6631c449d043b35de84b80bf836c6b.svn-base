@@ -1,0 +1,101 @@
+//
+//  DefaultMarketViewController.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DefaultMarketViewController.h"
+#import "DefaultTitleView.h"
+#import "DefaultCell.h"
+#import "DefaultMarketSectionView.h"
+
+@interface DefaultMarketViewController ()<defaultMarketDidDelegate>
+
+@property (nonatomic,retain)NSMutableArray *datas;
+@property (nonatomic,retain)NSMutableArray *second;
+@end
+
+@implementation DefaultMarketViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        self.title = @"自提超市";
+        self.headerViewHeight = 40.0f;
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.view.backgroundColor = [UIColor colorWithRed:250.0/255.0 green:249.0/255.0 blue:246.0/255.0 alpha:1];
+    self.datas = [[NSMutableArray alloc]initWithObjects:@"22222",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111", nil];
+    self.second = [[NSMutableArray alloc]initWithObjects:@"22222",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111", nil];
+    NSArray *array = [NSArray arrayWithObjects:@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111",@"1111111", nil];
+    DefaultMarketSectionView *headerView = [[DefaultMarketSectionView alloc]initDefaultMarketSectionViewWith:array];
+    headerView.delegate = self;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 72.0f;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return [self.datas count];
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+   static NSString *identifier = @"cell";
+    DefaultCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    if(cell == nil)
+    {
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"DefaultCell" owner:self options:nil]lastObject];
+    }
+    [cell setCellValueWithString:[self.datas objectAtIndex:indexPath.row]];
+    cell.addressButton.tag = indexPath.row +100;
+    [cell.addressButton addTarget:self action:@selector(areaDidClick:) forControlEvents:UIControlEventTouchUpInside];
+    return cell;
+}
+-(void)areaDidClick:(UIButton *)button
+{
+    //button.tag-100 就是选中的cell
+    [self.datas replaceObjectAtIndex:button.tag-100 withObject:@"22222"];
+    [self.tableView reloadData];
+}
+-(void)defaultMarketDidSelectArea:(NSInteger)index
+{
+    [self.datas removeAllObjects];
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+    [NSTimer scheduledTimerWithTimeInterval:.8 target:self selector:@selector(handleMaxShowTimer) userInfo:nil repeats:NO];
+}
+-(void)handleMaxShowTimer
+{
+    [self.datas addObjectsFromArray:self.second];
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+}
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

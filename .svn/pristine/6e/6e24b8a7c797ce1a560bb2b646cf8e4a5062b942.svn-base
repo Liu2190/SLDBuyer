@@ -1,0 +1,21 @@
+
+#import <Foundation/Foundation.h>
+#import "ASIHTTPRequest.h"
+
+typedef enum {
+    DefaultRequest,                             // default
+    DoSelectBannerRequest,                      // banner图查询
+    DoExitLoginRequest,
+    DoLoginRequest,
+    DoVerifyRequest,
+    DoRegisterRequest,
+    DoUpdatePasswordRequest,
+    
+}RequestType;
+
+@protocol RequestDelegate <NSObject>
+- (void)requestFinished:(ASIHTTPRequest *)request;
+- (void)requestFailed:(ASIHTTPRequest *)request;
+- (void)request:(ASIHTTPRequest *)request willRedirectToURL:(NSURL *)newURL;
+
+@end

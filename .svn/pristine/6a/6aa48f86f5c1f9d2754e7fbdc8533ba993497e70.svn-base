@@ -1,0 +1,69 @@
+//
+//  DHomeLevelController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-21.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DHomeLevelController.h"
+#import "DDetailViewController.h"
+#import "DHomeAllController.h"
+#import "DMainRootContrller.h"
+#import "DSearchBar.h"
+@implementation DHomeLevelController
+
+- (id)init {
+    self = [super init];
+    self.menuTitle = @"购物专区";
+    self.menuImage = @"Bracket_Home.png";
+    
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Goods
+    DHomeAllController *allController = [[DHomeAllController alloc]initWithDelegate:self];
+    _navigation = [[UINavigationController alloc]initWithRootViewController:allController];
+    [_navigation.view setFrame:CGRectMake(0, 0, self.contentView.frame.size.width, self.contentView.frame.size.height)];
+    _navigation.navigationBar.translucent = NO;
+    [self.contentView addSubview:_navigation.view];
+    
+    // searchBar
+    _theSearchBar = [[DSearchBar alloc]initWithFrame:CGRectMake(60,20.0f,200.0f,0.0f)];
+    UIColor *bgColor = [UIColor colorWithRed:64./255.0 green:138.0/255 blue:57.0/255. alpha:1.0];
+    _theSearchBar.tintColor = [UIColor colorWithRed:102./255.0 green:152.0/255 blue:73.0/255. alpha:1.0];
+    [_theSearchBar resetPropertyByBgColor:bgColor andplaceHolderColor:[UIColor whiteColor] andLeftImageName:@""];
+    _theSearchBar.delegate = self;
+    self.navigationItem.titleView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [self.navigationController.navigationBar addSubview:_theSearchBar];
+    
+    _searchGoodsController = [[DSearchGoodsController alloc]init];
+    [_searchGoodsController.view setFrame:CGRectMake(0, 0, self.contentView.frame.size.width, self.contentView.frame.size.height)];
+}
+
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+    [_theSearchBar resetPropertyByBgColor:[UIColor whiteColor] andplaceHolderColor:[UIColor grayColor] andLeftImageName:@""];
+    [self.contentView addSubview:_searchGoodsController.view];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [_navigation beginAppearanceTransition:YES animated:YES];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [_navigation endAppearanceTransition];
+}
+
+- (void)openDetailController:(id)controller {
+    UIViewController *detailController = (UIViewController*)controller;
+    [detailController beginAppearanceTransition:YES animated:YES];
+    [self.navigationController pushViewController:detailController animated:NO];
+    [detailController endAppearanceTransition];
+}
+
+@end

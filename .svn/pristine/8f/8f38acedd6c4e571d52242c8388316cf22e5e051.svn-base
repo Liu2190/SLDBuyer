@@ -1,0 +1,48 @@
+//
+//  DHomeLevelController.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-21.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DRootViewController.h"
+#import "DHomeDelegate.h"
+#import "DSearchBar.h"
+#import "DSearchGoodsController.h"
+#import "DHomeShopController.h"
+#import "DSaleCateListController.h"
+
+@interface DHomeLevelController : DRootViewController<DHomeDelegate,UISearchBarDelegate> {
+    /**
+     * 商品一级分类列表由一个UINavigation管理，
+     * 以并在第二级分类商品列表中可以出现子导航
+     */
+    UINavigationController *_navigation;
+    
+    /**
+     * 搜索栏定义，封装常用功能
+     */
+    DSearchBar *_theSearchBar;
+    
+    /**
+     * 商品搜索列表栏
+     */
+    DSearchGoodsController *_searchGoodsController;
+    
+    /**
+     * 当进入搜索界面时，导航栏左按钮项更新为关闭
+     */
+    UIBarButtonItem *_leftCloseItem;
+    
+    /**
+     * 导航栏右按钮项，此项为购物车入口
+     */
+    DHomeShopController *_homeShopController;
+    
+    DSaleCateListController *_saleCateController;
+}
+
++ (id)sharedInstance;
+
+@end

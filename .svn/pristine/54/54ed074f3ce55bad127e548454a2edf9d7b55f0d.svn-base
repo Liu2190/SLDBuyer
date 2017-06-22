@@ -1,0 +1,19 @@
+//
+//  DefaultCell.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface DefaultCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UILabel *marketNameLabel;
+@property (weak, nonatomic) IBOutlet UILabel *defaultLabel;
+@property (weak, nonatomic) IBOutlet UILabel *marketAddressLabel;
+@property (weak, nonatomic) IBOutlet UIButton *addressButton;
+@property (weak, nonatomic) IBOutlet UIImageView *bottomImage;
+@property (weak, nonatomic) IBOutlet UIImageView *topImage;
+-(void)setCellValueWithDict:(NSDictionary *)dict;
+@end

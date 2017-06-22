@@ -1,0 +1,52 @@
+//
+//  AboutUsServer.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-9.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "AboutUsServer.h"
+
+@implementation AboutUsServer
+- (void)doGetAbountDataByCallback:(void (^)(NSArray *))callback failureCallback:(void (^)(NSString *))failureCallback {
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/userHelpView/queryAfter?type=4", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetAbountDataRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+- (void)requestFinished:(ASIHTTPRequest *)request {
+    [super requestFinished:request];
+    NSDictionary *requestDictionary = [request userInfo];
+    NSDictionary *packData = [requestDictionary objectForKey:@"packedData"];
+    
+    if ([[packData objectForKey:@"status"]intValue] != 0) {
+        NSString *error = [packData objectForKey:@"msg"];
+        id failureCallback  = [requestDictionary objectForKey:kFailureCallback];
+        ((void(^)(NSString *))failureCallback)(error);
+        
+        return;
+    }
+    
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetAbountDataRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        NSArray *array = [dict objectForKey:@"list"];
+        NSDictionary *dic = [array objectAtIndex:0];
+        NSString *addressStrings = [dic objectForKey:@"content"];
+        NSArray *datas = [addressStrings componentsSeparatedByString:@"dbuyer@"];
+        
+        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(NSArray *))callback)(datas);
+    }
+    
+}
+
+@end

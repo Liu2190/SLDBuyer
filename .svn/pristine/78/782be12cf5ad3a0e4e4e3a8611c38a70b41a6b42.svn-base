@@ -1,0 +1,107 @@
+//
+//  DHomeAllController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-23.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DHomeAllController.h"
+#import "DHomeGoodsBannerCell.h"
+#import "DHomeGoodsAllCell.h"
+#import "DDetailViewController.h"
+#import "DCateGoodsListController.h"
+
+#define tabBar_height_size  45
+
+@implementation DHomeAllController
+
+- (id)initWithDelegate:(id)delegate {
+    self = [super init];
+    self.homeDelegate = delegate;
+    
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    CGRect rect = CGRectMake(0, 0, self.view.frame.size.width, tabBar_height_size);
+    NSDictionary *tabSale = @{@"image":@"home_tab_sale.jpeg",@"title":@"促销商品"};
+    NSDictionary *tabCate = @{@"image":@"home_tab_cate.jpeg",@"title":@"促销分类"};
+    NSArray *tabTitles = @[tabSale,tabCate];
+    _tabBarView = [[DHomeTabBarView alloc]initWithFrame:rect andTitles:tabTitles];
+    [self.view addSubview:_tabBarView];
+    
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, tabBar_height_size, self.view.frame.size.width, self.view.frame.size.height-tabBar_height_size-64)];
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    [self.view addSubview:_tableView];
+    
+    self.goodsAllDatas = [[NSMutableArray alloc]init];
+    self.goodsBannerDatas = [[NSMutableArray alloc]init];
+    [self.goodsAllDatas addObject:@"a"];
+    [self.goodsAllDatas addObject:@"a"];
+    [self.goodsAllDatas addObject:@"a"];
+}
+
+#pragma mark - Table view data source
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if (section ==0) return 1;
+    if (section == 1) return _goodsAllDatas.count;
+    
+    return 0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) return [DHomeGoodsBannerCell heightForCell];
+    if (indexPath.section == 1) return [DHomeGoodsAllCell heightForCell];
+    
+    return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *goodScroll_reuseIdentifier = @"HomeGoodsBannerCell";
+    static NSString *goodsAll_reuseIdentifier = @"HomeGoodsAllCell";
+    
+    NSString *reuseIdentifier = goodsAll_reuseIdentifier;
+    if (indexPath.section == 0) reuseIdentifier = goodScroll_reuseIdentifier;
+
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+    if (cell == nil) {
+        if (indexPath.section == 0) {
+            cell = [[DHomeGoodsBannerCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+        }
+        
+        if (indexPath.section == 1) {
+            cell = [[DHomeGoodsAllCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+        }
+    }
+    
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        DCateGoodsListController *cateGoodsList = [[DCateGoodsListController alloc]init];
+        [self.navigationController pushViewController:cateGoodsList animated:YES];
+        return;
+    }
+    
+    DDetailViewController *detailController = [[DDetailViewController alloc]init];
+    [self.homeDelegate openDetailController:detailController];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)setDefaultNavigationStyle {
+}
+
+@end

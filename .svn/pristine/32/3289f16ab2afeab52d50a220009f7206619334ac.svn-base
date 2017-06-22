@@ -1,0 +1,213 @@
+//
+//  DCateGoodsListController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-26.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DCateGoodsViewController.h"
+#import "DHomeServer.h"
+#import "DHomeBanner.h"
+#import "DHomeGoodsCate.h"
+#import "DHomeGoodsAllCell.h"
+#import "DHomeGoodsBannerCell.h"
+#import "DImageView.h"
+#import "UIButton+Extensions.h"
+
+@implementation DCateGoodsViewController
+
+- (id)initWithCateId:(int)cateId andTitle:(NSString*)title {
+    self = [super init];
+    self.cateId = cateId;
+    _naviTitle = title;
+    
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = _naviTitle;
+    self.goodsAllDatas = [[NSMutableArray alloc]init];
+    
+    [self.tableView setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+    [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    self.tableView.allowsSelection = NO;
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    [self.tableView setBackgroundColor:[UIColor colorWithRed:250./255 green:249./255 blue:246./255 alpha:1.0]];
+    
+    if (self.isBannerData) {
+        self.goodsBannerDatas = [[NSMutableArray alloc]init];
+        [[TServerFactory getServerInstance:@"DHomeServer"]doSelectBannerRecordByCallback:^(NSArray *datas) {
+            [self.goodsBannerDatas setArray:datas];
+            [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+        } failureCallback:^(NSString *resp) {
+            [[DUtilities sharedInstance]popMessageError:resp target:self completion:^(BOOL isFinish) {
+                
+            }];
+        }];
+    }
+    
+    /*[[TServerFactory getServerInstance:@"DHomeServer"]
+     queryCateListByCateId:self.cateId andVersion:0 andCallBack:^(NSArray *datas) {
+         NSLog(@"%@",datas);
+     } failureCallback:^(NSString *resp) {
+         
+     }];*/
+    
+    [self queryProductsByOneCate:0];
+}
+
+- (void)queryProductsByOneCate:(int)versionNo {
+    [[DUtilities sharedInstance]popTarget:self.view];
+    [[TServerFactory getServerInstance:@"DHomeServer"]
+     queryProductsByOneCateByVersionNo:versionNo andCallBack:^(NSArray *datas) {
+         [[DUtilities sharedInstance]dismiss];
+         for (DHomeGoodsCate *goodsForm in datas)
+             [self.goodsAllDatas addObject:goodsForm];
+         
+         [self.tableView reloadData];
+     } failureCallback:^(NSString *resp) {
+         [[DUtilities sharedInstance]dismiss];
+         [[DUtilities sharedInstance]popMessageError:resp target:self completion:^(BOOL isFinish) {
+             
+         }];
+     }];
+}
+
+- (void)initICE {
+    ICETutorialLabelStyle *subStyle = [[ICETutorialLabelStyle alloc] init];
+    [subStyle setFont:TUTORIAL_SUB_TITLE_FONT];
+    [subStyle setTextColor:TUTORIAL_LABEL_TEXT_COLOR];
+    [subStyle setLinesNumber:TUTORIAL_SUB_TITLE_LINES_NUMBER];
+    [subStyle setOffset:TUTORIAL_SUB_TITLE_OFFSET];
+    
+    ICETutorialLabelStyle *descStyle = [[ICETutorialLabelStyle alloc] init];
+    [descStyle setFont:TUTORIAL_DESC_FONT];
+    [descStyle setTextColor:TUTORIAL_LABEL_TEXT_COLOR];
+    [descStyle setLinesNumber:TUTORIAL_DESC_LINES_NUMBER];
+    [descStyle setOffset:TUTORIAL_DESC_OFFSET];
+    
+    CGRect iceRect = CGRectMake(0, 0, self.view.frame.size.width, [DHomeGoodsBannerCell heightForCell]);
+    NSMutableArray *pages = [[NSMutableArray alloc]init];
+    for (DHomeBanner *bannerForm in self.goodsBannerDatas) {
+        ICETutorialPage *page = [self genICETPages:bannerForm];
+        [pages addObject:page];
+    }
+    
+    _iceController = [[ICETutorialController alloc] initWithFrame:iceRect andPages:pages];
+    [_iceController setCommonPageSubTitleStyle:subStyle];
+    [_iceController setCommonPageDescriptionStyle:descStyle];
+    [_iceController startScrolling];
+}
+
+- (ICETutorialPage*)genICETPages:(DHomeBanner*)banner {
+    ICETutorialPage *ICEPage = [[ICETutorialPage alloc] initWithSubTitle:@"热销中"
+                                                             description:banner.sharetext
+                                                             pictureName:banner.imgURL];
+    
+    return ICEPage;
+}
+
+#pragma mark - Table view data source
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if (section ==0) return self.goodsBannerDatas.count>0?1:0;
+    if (section == 1) return _goodsAllDatas.count;
+    
+    return 0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) return [DHomeGoodsBannerCell heightForCell];
+    if (indexPath.section == 1) return [DHomeGoodsAllCell heightForCell];
+    
+    return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *goodScroll_reuseIdentifier = @"HomeGoodsBannerCell";
+    static NSString *goodsAll_reuseIdentifier = @"HomeGoodsAllCell";
+    
+    NSString *reuseIdentifier = goodsAll_reuseIdentifier;
+    if (indexPath.section == 0) reuseIdentifier = goodScroll_reuseIdentifier;
+    
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+    if (cell == nil) {
+        if (indexPath.section == 0) {
+            cell = [[DHomeGoodsBannerCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+        }
+        
+        if (indexPath.section == 1) {
+            cell = [[DHomeGoodsAllCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+            [((DHomeGoodsAllCell*)cell) setTapGesture:self];
+        }
+    }
+    
+    if (indexPath.section == 0) {
+        if (self.goodsBannerDatas.count > 0) {
+            //if (_iceController == nil) {
+                [self initICE];
+                [cell addSubview:_iceController.view];
+            //}
+        }
+    }
+    
+    if (indexPath.section == 1) {
+        DHomeGoodsCate *allGoodsForm = [self.goodsAllDatas objectAtIndex:indexPath.row];
+        [((DTableViewCell*)cell) setDataForCell:allGoodsForm];
+    }
+    
+    return cell;
+}
+
+/**
+ * 点击更多获取分类商品
+ */
+- (void)clickedForMoreCateGoods:(UIGestureRecognizer*)gesture {
+    DImageView *view = (DImageView*)gesture.view;
+    [self.cateDelegate openMoreCateGoods:view.tag andTitle:view.value];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
+}
+
+- (void)setDefaultNavigationStyle {
+    UIImage * imageNormal = [UIImage imageNamed:@"Nav_Back_Gray.png"];
+    
+    // create your button
+    UIButton * button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.exclusiveTouch = YES;
+    [button addTarget:self action:@selector(doBackAction) forControlEvents:UIControlEventTouchUpInside];
+    [button setBackgroundImage:imageNormal forState:UIControlStateNormal];
+    
+    // set the frame of the button (better to grab actual offset of leftbarbuttonitem instead of magic numbers)
+    button.frame = CGRectMake(-5.0, 0.0, imageNormal.size.width, imageNormal.size.height);
+    [button setHitTestEdgeInsets:UIEdgeInsetsMake(-10, -10, -10, -30)];
+    // set the barbuttonitem to be the view
+    UIBarButtonItem * barButtonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
+    self.navigationItem.leftBarButtonItem= barButtonItem;
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label.text = _naviTitle;
+    label.backgroundColor = [UIColor clearColor];
+    label.font = [UIFont systemFontOfSize:16.0];
+    label.textAlignment = NSTextAlignmentLeft;
+    label.textColor = [UIColor colorWithRed:102./255.0 green:152.0/255 blue:73.0/255. alpha:1.0];
+    self.navigationItem.titleView = label;
+    self.navigationItem.titleView.frame = CGRectMake(30, 0, 100, 15);
+    [label sizeToFit];
+    
+}
+
+- (void)doBackAction {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+@end

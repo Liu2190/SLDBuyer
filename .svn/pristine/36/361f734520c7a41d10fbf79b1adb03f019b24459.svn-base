@@ -1,0 +1,29 @@
+//
+//  DDetailViewController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-21.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DDetailViewController.h"
+#import "DMainRootContrller.h"
+
+@implementation DDetailViewController
+
+- (void)doCloseDetail {
+    [[DMainRootContrller sharedManager]updateStatuBarColorByStyle:UIStatusBarStyleLightContent];
+    [self.navigationController.view removeFromSuperview];
+}
+
+- (void)addLeftButtonItem {
+    UIButton *leftButton = [[UIButton alloc]initWithFrame:CGRectMake(0,0,25,25)];
+    [leftButton setImage:[UIImage imageNamed:@"Nav_Close_Green.png"]forState:UIControlStateNormal];
+    [leftButton addTarget:self action:@selector(doCloseDetail)forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *leftCloseItem = [[UIBarButtonItem alloc]initWithCustomView:leftButton];
+    self.navigationItem.leftBarButtonItem= leftCloseItem;
+}
+
+
+
+@end

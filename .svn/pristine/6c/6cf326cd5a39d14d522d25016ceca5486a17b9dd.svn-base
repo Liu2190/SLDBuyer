@@ -1,0 +1,24 @@
+//
+//  DHomeGoods.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-31.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DRecord.h"
+
+@interface DHomeGoods : DRecord
+
+@property (nonatomic,strong)NSString *commodityImage;
+@property (nonatomic,strong)NSString *commodityName;
+@property (nonatomic,strong)NSString *marketPrice;
+@property (nonatomic,assign)int productInCartNum;
+@property (nonatomic,assign)NSString *sellPrice;
+
+/**
+ * 本地加入数
+ */
+@property (nonatomic,retain)NSNumber *addNum;
+
+@end

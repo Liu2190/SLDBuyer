@@ -1,0 +1,108 @@
+//
+//  CreateNewAddressController.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "CreateNewAddressController.h"
+#import "CreateAddressView.h"
+#import "AccountLoginCell.h"
+
+@interface CreateNewAddressController ()<UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate>
+@property (nonatomic,retain)UITableView *table;
+@property (nonatomic,retain)CreateAddressView *createView;
+
+@end
+
+@implementation CreateNewAddressController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        self.title = @"新建地址";
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor colorWithRed:250.0/255.0 green:249.0/255.0 blue:246.0/255.0 alpha:1];
+    // Do any additional setup after loading the view.
+    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithTitle:@"保存" style:UIBarButtonItemStylePlain target:self action:@selector(doSaveAction)];
+    self.navigationItem.rightBarButtonItem=rightItem;
+    self.createView = [[[NSBundle mainBundle]loadNibNamed:@"CreateAddressView" owner:self options:nil]lastObject];
+    self.createView.frame = CGRectMake(0, 0, self.view.frame.size.width, 400);
+    self.createView.tipsTextField.delegate = self;
+    self.createView.nameTextField.delegate = self;
+    self.createView.phoneTextField.delegate = self;
+    self.createView.detailAddressTextField.delegate = self;
+    [self.createView.showAreaButton addTarget:self action:@selector(showDetailArea) forControlEvents:UIControlEventTouchUpInside];
+    self.table = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) style:UITableViewStylePlain];
+    self.table.delegate = self;
+    self.table.dataSource = self;
+    self.table.backgroundColor = [UIColor clearColor];
+    self.table.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [self.view addSubview:self.table];
+}
+-(void)showDetailArea
+{
+    
+}
+-(void)doSaveAction
+{
+    
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return indexPath.row == 0?400:120;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 2;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifier = @"cell";
+    if(indexPath.row == 0)
+    {
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+        if(cell == nil)
+        {
+            cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
+        }
+        [cell.contentView addSubview:self.createView];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.backgroundColor = [UIColor clearColor];
+        cell.contentView.backgroundColor = [UIColor clearColor];
+        return cell;
+    }
+    AccountLoginCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    if(cell == nil)
+    {
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"AccountLoginCell" owner:self options:nil]lastObject];
+    }
+    cell.tipLabel.text = @"保存";
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    return cell;
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

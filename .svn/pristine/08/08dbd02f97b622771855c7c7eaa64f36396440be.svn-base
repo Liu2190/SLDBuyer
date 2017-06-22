@@ -1,0 +1,21 @@
+//
+//  DDetailBaseController.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-4.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DBaseViewController.h"
+#import "TRootViewController.h"
+
+@interface DDetailBaseController : TRootViewController {
+    UIImage *_goodsImage;
+    CGRect _startFrame;
+    
+    UIImageView *_imageView;
+}
+
+- (id)initWithFrame:(CGRect)startFrame andProductImage:(UIImage*)image;
+
+@end

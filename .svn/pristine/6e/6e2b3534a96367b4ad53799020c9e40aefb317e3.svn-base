@@ -1,0 +1,27 @@
+//
+//  DTableViewCell.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-23.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DTableViewCell.h"
+
+@implementation DTableViewCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    
+    return self;
+}
+
+- (void)setDataForCell:(id)data {
+    
+}
+
++ (float)heightForCell {
+    return 44;
+}
+
+@end

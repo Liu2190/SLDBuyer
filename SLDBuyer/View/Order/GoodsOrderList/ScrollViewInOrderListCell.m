@@ -1,0 +1,79 @@
+//
+//  ScrollViewInOrderListCell.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-6.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "ScrollViewInOrderListCell.h"
+#import "DHomeGoods.h"
+#import "UIImageView+WebCache.h"
+
+@implementation ScrollViewInOrderListCell
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code
+    }
+    return self;
+}
+-(id)initScollViewWithArray:(NSArray *)productArray
+{
+    self = [super initWithFrame:CGRectMake(0, 0, 272, 56)];
+    if(self)
+    {
+        self.userInteractionEnabled = YES;
+        [self createScrolWith:productArray];
+    }
+    return self;
+}
+-(void)createScrolWith:(NSArray *)productArray
+{
+    UIScrollView *scrol = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, 272, 56)];
+    scrol.userInteractionEnabled = YES;
+    scrol.showsHorizontalScrollIndicator = YES;
+    scrol.showsVerticalScrollIndicator = NO;
+    [self addSubview:scrol];
+    if(productArray.count == 1)
+    {
+        DHomeGoods *product = (DHomeGoods *)[productArray lastObject];
+        scrol.scrollEnabled = NO;
+        scrol.contentSize = CGSizeMake(272, 56);
+        UIImageView *productImage = [[UIImageView alloc]initWithFrame:CGRectMake(20, 10, 35, 35)];
+        [productImage setImageWithURL:[NSURL URLWithString:product.commodityImage] placeholderImage:[UIImage imageNamed:@""]];
+        [scrol addSubview:productImage];
+        UILabel *productName = [[UILabel alloc]initWithFrame:CGRectMake(70, 10, 200, 40)];
+        productName.backgroundColor = [UIColor clearColor];
+        productName.textColor = [UIColor darkGrayColor];
+        productName.font = [UIFont systemFontOfSize:12];
+        productName.text = product.commodityName;
+        productName.numberOfLines = 0;
+        [scrol addSubview:productName];
+    }
+    if(productArray.count > 1)
+    {
+        scrol.scrollEnabled = YES;
+        scrol.contentSize = CGSizeMake(productArray.count*40+20, 56);
+        for(int i = 0;i<productArray.count;i++)
+        {
+            DHomeGoods *product = (DHomeGoods *)[productArray objectAtIndex:i];
+            UIImageView *productImage = [[UIImageView alloc]initWithFrame:CGRectMake(20+40*i, 10, 35, 35)];
+            [productImage setImageWithURL:[NSURL URLWithString:product.commodityImage] placeholderImage:[UIImage imageNamed:@""]];
+            [scrol addSubview:productImage];
+            
+        }
+    }
+}
+/*
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect
+{
+    // Drawing code
+}
+*/
+
+@end

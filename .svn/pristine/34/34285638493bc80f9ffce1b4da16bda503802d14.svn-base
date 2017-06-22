@@ -1,0 +1,214 @@
+//
+//  AccountServer.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-10.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "AccountServer.h"
+
+@implementation AccountServer
+- (void)doGetMarketVersionNumByCallback:(void(^)(NSArray *ret))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/version/queryVersionInfoForFL", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    [item setPostValue:[TimeStamp timeStamp] forKey:@"stamp"];
+    [item setPostValue:[MD5 md5] forKey:@"verify"];
+    [item setPostValue:[[NSUserDefaults standardUserDefaults]objectForKey:@"versionNum"] forKey:@"versionNum"];
+    [item setPostValue:@"2" forKey:@"os_code"];
+    [item setPostValue:[NSString stringWithFormat:@"%d",[UIDevice currentResolution]] forKey:@"size_code"];
+    [item setPostValue:@"7" forKey:@"type"];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetMarketVersionNumRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+- (void)doGetMarketAreaByCallback:(void(^)(NSArray *ret))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/store/queryCitys", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    [item setPostValue:[TimeStamp timeStamp] forKey:@"stamp"];
+    [item setPostValue:[MD5 md5] forKey:@"verify"];
+    [item setPostValue:[[NSUserDefaults standardUserDefaults]objectForKey:@"versionNum"] forKey:@"versionNum"];
+    [item setPostValue:@"2" forKey:@"os_code"];
+    [item setPostValue:[NSString stringWithFormat:@"%d",[UIDevice currentResolution]] forKey:@"size_code"];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetMarketAreaRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+- (void)doGetMarketListByCallback:(void(^)(NSArray *ret))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+   // DoGetMarketListRequest,
+}
+- (void)DoUpdateMarketByID:(NSString *)marketID AndCallback:(void(^)(NSArray *ret))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/userAttribute/saveByUserIdAndAttrType", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    [item setPostValue:[TimeStamp timeStamp] forKey:@"stamp"];
+    [item setPostValue:[MD5 md5] forKey:@"verify"];
+    [item setPostValue:[[NSUserDefaults standardUserDefaults]objectForKey:@"versionNum"] forKey:@"versionNum"];
+    [item setPostValue:@"2" forKey:@"os_code"];
+    [item setPostValue:[NSString stringWithFormat:@"%d",[UIDevice currentResolution]] forKey:@"size_code"];
+    [item setPostValue:@"1" forKey:@"type"];
+    [item setPostValue:marketID forKey:@"value"];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoUpdateMarketRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+- (void)doGetUserPointByCallback:(void(^)(NSString *point))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/settlementcommotitty/getPersonCenter", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    [item setPostValue:[TimeStamp timeStamp] forKey:@"stamp"];
+    [item setPostValue:[MD5 md5] forKey:@"verify"];
+    [item setPostValue:[[NSUserDefaults standardUserDefaults]objectForKey:@"versionNum"] forKey:@"versionNum"];
+    [item setPostValue:@"2" forKey:@"os_code"];
+    [item setPostValue:[NSString stringWithFormat:@"%d",[UIDevice currentResolution]] forKey:@"size_code"];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetUserPointRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+/**
+ * 获取地址列表
+ */
+- (void)doGetAddressListByCallBack:(void(^)(NSMutableArray *array))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    
+}
+/**
+ * 删除地址
+ */
+- (void)doDeleteAddressBy:(NSString *)addressID AndCallBack:(void(^)(NSMutableArray *array))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    
+}
+/**
+ * 编辑地址
+ */
+- (void)doEditAddressBy:(NSString *)address AndCallBack:(void(^)(NSMutableArray *array))callback failureCallback:(void(^)(NSString *resp))failureCallback{
+    
+}
+/**
+ * 新建地址
+ */
+- (void)doCreateAddressBy:(NSString *)address AndCallBack:(void(^)(NSMutableArray *array))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    
+}
+/**
+ * 获取个人账户信息
+ */
+- (void)doGetIndividualInformationByCallBack:(void(^)(IndividualModel *inModel))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/settlementcommotitty/getPersonCenter", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    [item setPostValue:[TimeStamp timeStamp] forKey:@"stamp"];
+    [item setPostValue:[MD5 md5] forKey:@"verify"];
+    [item setPostValue:[[NSUserDefaults standardUserDefaults]objectForKey:@"versionNum"] forKey:@"versionNum"];
+    [item setPostValue:@"2" forKey:@"os_code"];
+    [item setPostValue:[NSString stringWithFormat:@"%d",[UIDevice currentResolution]] forKey:@"size_code"];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetUserInforRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+/**
+ * 修改个人账户信息
+ */
+- (void)doUpdateIndividualInforBy:(IndividualModel *)model AndCallBack:(void(^)(int status))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/settlementcommotitty/getPersonCenter", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    [item setPostValue:[TimeStamp timeStamp] forKey:@"stamp"];
+    [item setPostValue:[MD5 md5] forKey:@"verify"];
+    [item setPostValue:[[NSUserDefaults standardUserDefaults]objectForKey:@"versionNum"] forKey:@"versionNum"];
+    [item setPostValue:@"2" forKey:@"os_code"];
+    [item setPostValue:[NSString stringWithFormat:@"%d",[UIDevice currentResolution]] forKey:@"size_code"];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoUpdateUserInforRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    [self.requestQueue addOperation:item];
+    [self start];
+
+}
+- (void)requestFinished:(ASIHTTPRequest *)request {
+    [super requestFinished:request];
+    NSDictionary *requestDictionary = [request userInfo];
+    NSDictionary *packData = [requestDictionary objectForKey:@"packedData"];
+    
+    if ([[packData objectForKey:@"status"]intValue] != 0) {
+        NSString *error = [packData objectForKey:@"msg"];
+        id failureCallback  = [requestDictionary objectForKey:kFailureCallback];
+        ((void(^)(NSString *))failureCallback)(error);
+        
+        return;
+    }
+    
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetMarketVersionNumRequest) {
+//        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+//        NSString *newVersion = [dict objectForKey:@"version"];
+//        NSDictionary *dic = [array objectAtIndex:0];
+//        NSString *addressStrings = [dic objectForKey:@"content"];
+//        NSArray *datas = [addressStrings componentsSeparatedByString:@"dbuyer@"];
+//        
+//        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+//        ((void(^)(NSArray *))callback)(datas);
+    }
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetMarketAreaRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        int statusS = [[dict objectForKey:@"status"] intValue];
+        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(int ))callback)(statusS);
+    }
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoUpdateMarketRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(NSDictionary *))callback)(dict);
+    }
+    if([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue]== DoGetUserPointRequest)
+    {
+        NSDictionary *dict = [requestDictionary objectForKey:@"packedData"];
+        NSString *point = [dict objectForKey:@"integralInfo"];
+        id callback = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(NSString *))callback)(point);
+    }
+    if([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetUserInforRequest)
+    {
+        NSDictionary *dict = [requestDictionary objectForKey:@"packedData"];
+        IndividualModel *model = [[IndividualModel alloc]init];
+        model.name = [dict objectForKey:@"name"];
+        id callback = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(IndividualModel *))callback)(model);
+    }
+    if([[requestDictionary objectForKey:USER_INFO_KEY_TYPE ]floatValue]==DoUpdateUserInforRequest)
+    {
+        NSDictionary *dict = [requestDictionary objectForKey:@"packedData"];
+        int ret = [[dict objectForKey:@"status"] intValue];
+        id callback = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(int))callback)(ret);
+    }
+}
+@end

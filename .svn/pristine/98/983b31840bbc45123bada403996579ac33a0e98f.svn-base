@@ -1,0 +1,64 @@
+//
+//  DCateListViewController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-3.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DCateListViewController.h"
+#import "DCateSectionTopView.h"
+#import "DCateSectionView.h"
+
+@implementation DCateListViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    _cateLeves = [[NSMutableArray alloc]init];
+
+}
+
+
+#pragma mark - Table view data source
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return _cateLeves.count>0?_cateLeves.count+1:1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return 0;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    float h = [self tableView:tableView heightForHeaderInSection:section];
+    
+    UIView *sectionView;
+    if (section == 0) {
+        sectionView = [[DCateSectionTopView alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, h)];
+    } else {
+        sectionView = [[DCateSectionView alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, h)];
+    }
+    
+
+    return sectionView;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *reuseIdentifier = @"cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier forIndexPath:indexPath];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+    }
+    
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    if (section == 0) return 60;
+    return 40;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 40.0f;
+}
+
+@end

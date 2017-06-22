@@ -1,0 +1,150 @@
+//
+//  DefaultMarketDB.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-13.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DefaultMarketDB.h"
+#import "MarketModel.h"
+
+#define debugMethod(...) NSLog((@"In %s,%s [Line %d] "), __PRETTY_FUNCTION__,__FILE__,__LINE__,##__VA_ARGS__)
+
+static DefaultMarketDB *gl_DefaultMarketDB = nil;
+
+@implementation DefaultMarketDB
+
++ (DefaultMarketDB *)sharedDataBase
+{
+    if(!gl_DefaultMarketDB){
+        gl_DefaultMarketDB = [[DefaultMarketDB alloc]init];
+    }
+    return gl_DefaultMarketDB;
+}
++ (NSString *)filePath:(NSString *)fileName
+{
+    //获得当前软件安装目录(沙盒目录)
+    NSString *homePath = NSHomeDirectory();
+    homePath = [homePath stringByAppendingPathComponent:@"Library/Caches"];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    //目录存在
+    if([fm fileExistsAtPath:homePath])
+    {
+        //文件名不为空
+        if(fileName && [fileName length]!=0)
+        {
+            homePath = [homePath stringByAppendingPathComponent:fileName];
+        }
+    }
+    else
+    {
+    }
+    return homePath;
+}
+-(BOOL)ifNeedUpdateVersion:(NSInteger)netVersion
+{
+    NSString *localVersion = [[NSString alloc]init];
+    if([mDB open])
+    {
+        NSString *sql = @"create table if not exists marketlistVersion(updateDate text,version text)";
+        [mDB executeUpdate:sql];
+        NSString *selectSql = @"select version from marketlistVersion";
+        FMResultSet *rs = [mDB executeQuery:selectSql];
+        while ([rs next]) {
+            localVersion = [rs objectForColumnIndex:0];
+        }
+    }
+    [mDB close];
+    if(netVersion == [localVersion intValue])
+    {
+        return NO;
+    }
+    return YES;
+}
+- (void)updateVersion:(NSInteger)version
+{
+    if([mDB open])
+    {
+        NSString *sql = @"create table if not exists marketlistVersion(updateDate text,version text)";
+        [mDB executeUpdate:sql];
+        NSString *date = [[NSDate date] description];
+        NSString *insertSQL =[NSString stringWithFormat:@"UPDATE marketlistVersion SET updateDate = '%@',version = '%d'",date,version];
+        [mDB executeUpdate:insertSQL];
+    }
+    [mDB close];
+}
+-(void)insertAreaData:(NSMutableArray *)datas
+{
+    if([mDB open])
+    {
+        NSString *dropSql = @"drop table areaTable";
+        [mDB executeUpdate:dropSql];
+        NSString *sql = @"create table if not exists areaTable(areaName text,areaId text)";
+        [mDB executeUpdate:sql];
+        for(MarketAreaModel *model in datas)
+        {
+            NSString *insertSql = [NSString stringWithFormat:@"insert into areaTable (areaName,areaId) VALUES('%@','%@')",model.areaName,model.areaID];
+            [mDB executeUpdate:insertSql];
+        }
+    }
+    [mDB close];
+}
+- (void)insertMarketListData:(NSMutableArray *)datas
+{
+    if([mDB open])
+    {
+        NSString *dropSql = @"drop table marketTable";
+        [mDB executeUpdate:dropSql];
+        NSString *createSql = @"create table if not exists marketTable(areaName text,areaId text,marketName text,marketId text,marketAddress text,latitude text,longtitude text,storeSort text)";
+        [mDB executeUpdate:createSql];
+        for(MarketModel *model in datas)
+        {
+            NSString *insertSql = [NSString stringWithFormat:@"insert into marketTable (areaName,areaId,marketName,marketId,marketAddress,latitude,longtitude,storeSort) VALUES('%@','%@','%@','%@','%@','%@','%@','%@')",model.areaName,model.areaID,model.marketName,model.marketID,model.marketAddress,model.latitude,model.longtitude,model.storeSort];
+            [mDB executeUpdate:insertSql];
+        }
+    }
+    [mDB close];
+}
+- (NSMutableArray *)readDataFromArea
+{
+    NSMutableArray *datas = [[NSMutableArray alloc]init];
+    if([mDB open])
+    {
+        NSString *selectSql = [NSString stringWithFormat:@"select * from areaTable"];
+        FMResultSet *rs = [mDB executeQuery:selectSql];
+        while ([rs next]) {
+            MarketAreaModel *model = [[MarketAreaModel alloc]init];
+            model.areaName = [rs objectForColumnName:@"areaName"];
+            model.areaID = [rs objectForColumnName:@"areaId"];
+            [datas addObject:model];
+        }
+    }
+        [mDB close];
+        return datas;
+}
+- (NSMutableArray *)readFromMarketListWith:(MarketAreaModel *)areaModel
+{
+    NSMutableArray *dataArray = [[NSMutableArray alloc]init];
+    if([mDB open])
+    {
+        NSString *selectSql = [NSString stringWithFormat:@"select * from marketTable where areaId = '%@'",areaModel.areaID];
+        FMResultSet *rs = [mDB executeQuery:selectSql];
+        while ([rs next]) {
+            MarketModel *model = [[MarketModel alloc]init];
+            model.areaID = areaModel.areaID;
+            model.areaName = areaModel.areaName;
+            model.marketName = [rs objectForColumnName:@"marketName"];
+            model.marketAddress = [rs objectForColumnName:@"marketAddress"];
+            model.marketID = [rs objectForColumnName:@"marketId"];
+            model.latitude = [rs objectForColumnName:@"latitude"];
+            model.longtitude = [rs objectForColumnName:@"longtitude"];
+            model.storeSort = [rs objectForColumnName:@"storeSort"];
+            [dataArray addObject:model];
+        }
+    }
+    [mDB close];
+    return dataArray;
+}
+
+@end

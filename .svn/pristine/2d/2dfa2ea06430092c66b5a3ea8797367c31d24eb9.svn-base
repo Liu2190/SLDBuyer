@@ -1,0 +1,45 @@
+//
+//  DefaultTitleView.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface DefaultTitleView : UIView
+@property (weak, nonatomic) IBOutlet UIImageView *xichengView;
+@property (weak, nonatomic) IBOutlet UIImageView *dongchenView;
+@property (weak, nonatomic) IBOutlet UIImageView *xuanwuView;
+@property (weak, nonatomic) IBOutlet UIImageView *chongwenView;
+@property (weak, nonatomic) IBOutlet UIImageView *haidianView;
+@property (weak, nonatomic) IBOutlet UIImageView *chaoyangView;
+@property (weak, nonatomic) IBOutlet UIImageView *fengtaiView;
+@property (weak, nonatomic) IBOutlet UIImageView *shijingshanView;
+@property (weak, nonatomic) IBOutlet UIImageView *tongzhouView;
+@property (weak, nonatomic) IBOutlet UIImageView *daxingView;
+@property (weak, nonatomic) IBOutlet UIImageView *changpingView;
+@property (weak, nonatomic) IBOutlet UIImageView *shunyiView;
+@property (weak, nonatomic) IBOutlet UIImageView *huairouView;
+@property (weak, nonatomic) IBOutlet UIImageView *mentougouView;
+@property (weak, nonatomic) IBOutlet UIImageView *fangshanView;
+@property (weak, nonatomic) IBOutlet UIImageView *pingguView;
+@property (weak, nonatomic) IBOutlet UILabel *xichengLabel;
+@property (weak, nonatomic) IBOutlet UILabel *dongchengLabel;
+@property (weak, nonatomic) IBOutlet UILabel *xuanwuLabel;
+@property (weak, nonatomic) IBOutlet UILabel *chongwenLabel;
+@property (weak, nonatomic) IBOutlet UILabel *haidianLabel;
+@property (weak, nonatomic) IBOutlet UILabel *chaoyangLabel;
+@property (weak, nonatomic) IBOutlet UILabel *fengtaiLabel;
+@property (weak, nonatomic) IBOutlet UILabel *shijingshanLabel;
+@property (weak, nonatomic) IBOutlet UILabel *tongzhouLabel;
+@property (weak, nonatomic) IBOutlet UILabel *daxingLabel;
+@property (weak, nonatomic) IBOutlet UILabel *changpingLabel;
+@property (weak, nonatomic) IBOutlet UILabel *shunyiLabel;
+@property (weak, nonatomic) IBOutlet UILabel *huairouLabel;
+@property (weak, nonatomic) IBOutlet UILabel *mentougouLabel;
+@property (weak, nonatomic) IBOutlet UILabel *fangshanLabel;
+@property (weak, nonatomic) IBOutlet UILabel *pingguLabel;
+
+@end

@@ -1,0 +1,27 @@
+//
+//  DCateSectionView.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-3.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DCateSectionView.h"
+
+@implementation DCateSectionView
+
+- (id)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    self.backgroundColor = [UIColor whiteColor];
+    
+    
+    UIImageView *lineImageView = [[UIImageView alloc]initWithFrame:
+                                  CGRectMake(0, frame.size.height-.5, self.frame.size.width, .5)];
+    [lineImageView setImage:[UIImage imageNamed:@"home_spe_line.png"]];
+    [self addSubview:lineImageView];
+    
+    return self;
+}
+
+
+@end

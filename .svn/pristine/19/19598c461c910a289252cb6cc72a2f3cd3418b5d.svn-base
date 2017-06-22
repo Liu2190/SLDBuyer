@@ -1,0 +1,44 @@
+//
+//  DLeftMenuLogin.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-29.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DLeftHeaderMenu.h"
+
+#define login_btn_width     60
+#define login_btn_height    40
+
+@implementation DLeftHeaderMenu
+
+- (id)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    
+    UIImageView *lineView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"home_tab_stand.png"]];
+    [lineView setFrame:CGRectMake((self.frame.size.width-.5)/2, 0, .5, self.frame.size.height)];
+    [self addSubview:lineView];
+    
+    UIButton *loginBtn = [[UIButton alloc]initWithFrame:CGRectMake((frame.size.width/2-login_btn_width)/2, (frame.size.height-login_btn_height)/2, login_btn_width, login_btn_height)];
+    [loginBtn setImage:[UIImage imageNamed:@"Bracket_Login.png"] forState:UIControlStateNormal];
+    [loginBtn addTarget:self action:@selector(doLoginAction) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:loginBtn];
+    
+    UIButton *registerBtn = [[UIButton alloc]initWithFrame:CGRectMake(frame.size.width/2+(frame.size.width/2-login_btn_width)/2, (frame.size.height-login_btn_height)/2, login_btn_width, login_btn_height)];
+    [registerBtn setImage:[UIImage imageNamed:@"Bracket_register.png"] forState:UIControlStateNormal];
+    [registerBtn addTarget:self action:@selector(doRegisterAction) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:registerBtn];
+    
+    return self;
+}
+
+- (void)doLoginAction {
+    [self.leftMenuDelegate doOpenLoginController];
+}
+
+- (void)doRegisterAction {
+    [self.leftMenuDelegate doOpenRegisterController];
+}
+
+@end

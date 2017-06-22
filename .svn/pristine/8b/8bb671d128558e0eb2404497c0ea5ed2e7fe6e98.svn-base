@@ -1,0 +1,43 @@
+//
+//  CreateAddressView.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "CommonTextField.h"
+#import "AddressListModel.h"
+
+@protocol createAddressDelegate
+-(void)AllStatus:(BOOL)status AndData:(AddressListModel *)model;
+@end
+
+@interface CreateAddressView : UIView<UITextViewDelegate>
+@property (nonatomic,retain)CommonTextField *tipsField;
+@property (nonatomic,retain)CommonTextField *nameField;
+@property (nonatomic,retain)CommonTextField *phoneField;
+/**
+ *通过验证值来更新UI
+ */
+- (BOOL)updateByTextField:(UITextField*)field;
+- (BOOL)updateByTextView:(UITextView *)textView;
+@property (nonatomic,assign)id delegate;
+@property (weak, nonatomic) IBOutlet UIImageView *tipBack;
+@property (weak, nonatomic) IBOutlet UIImageView *nameBack;
+@property (weak, nonatomic) IBOutlet UIImageView *phoneBack;
+@property (weak, nonatomic) IBOutlet UITextView *detailAddressTextView;
+@property (weak, nonatomic) IBOutlet UITextField *areaLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *directImage;
+@property (weak, nonatomic) IBOutlet UIButton *showAreaButton;
+@property (weak, nonatomic) IBOutlet UILabel *setDefaultLabel;
+@property (weak, nonatomic) IBOutlet UISwitch *areaSwitch;
+@property (weak, nonatomic) IBOutlet UIImageView *textViewTipImage;
+@property (weak, nonatomic) IBOutlet UILabel *textViewTipLabel;
+@property (weak, nonatomic) IBOutlet UILabel *textViewPlaceHolder;
+/**
+ *关闭键盘
+ */
+-(void)cancelKeyboard;
+@end

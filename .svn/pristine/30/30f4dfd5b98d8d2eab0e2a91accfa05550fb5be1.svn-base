@@ -1,0 +1,76 @@
+//
+//  DDetailBaseController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-4.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DDetailBaseController.h"
+#import "DMainRootContrller.h"
+
+@implementation DDetailBaseController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    [self.navigationController setNavigationBarHidden:YES];
+    [[DMainRootContrller sharedManager]updateStatuBarColorByStyle:UIStatusBarStyleDefault];
+    [[DMainRootContrller sharedManager]setOpenDrawerGesture:NO];
+    
+    [self.navigationController.view setBackgroundColor:[UIColor colorWithRed:1. green:1. blue:1. alpha:0.]];
+    [self.view setBackgroundColor:[UIColor colorWithRed:1. green:1. blue:1. alpha:0.f]];
+    
+    _imageView = [[UIImageView alloc]initWithFrame:_startFrame];
+    _imageView.contentMode = UIViewContentModeScaleAspectFill;
+    _imageView.image = _goodsImage;
+    [self.view addSubview:_imageView];
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        CGRect frame = _startFrame;
+        frame.size.width = 84;
+        frame.size.height = 84;
+        
+        frame.origin.x = (self.view.frame.size.width-frame.size.width)/2;
+        frame.origin.y = 20;
+        
+        _imageView.frame = frame;
+        
+    } completion:^(BOOL finished) {
+        [self.navigationController.view setBackgroundColor:[UIColor colorWithRed:1. green:1. blue:1. alpha:1.f]];
+        [self.view setBackgroundColor:[UIColor colorWithRed:1. green:1. blue:1. alpha:1.f]];
+        
+        
+    }];
+    
+}
+
+- (id)initWithFrame:(CGRect)startFrame andProductImage:(UIImage*)image {
+    self = [super init];
+    _startFrame = startFrame;
+    _goodsImage = image;
+    
+    return self;
+}
+
+- (void)setDefaultNavigationStyle {
+    NSShadow *shadow = [[NSShadow alloc] init];
+    shadow.shadowColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.8];
+    shadow.shadowOffset = CGSizeMake(0, 1);
+    [[UINavigationBar appearance] setTitleTextAttributes: [NSDictionary dictionaryWithObjectsAndKeys:
+                                                           [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0], NSForegroundColorAttributeName,
+                                                           shadow, NSShadowAttributeName,
+                                                           [UIFont fontWithName:@"HelveticaNeue-CondensedBlack" size:19.0], NSFontAttributeName, nil]];
+    
+    UIColor *navBgColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1.0];
+    [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
+    [self.navigationController.navigationBar setBarTintColor:navBgColor];
+    self.navigationController.navigationBar.translucent = NO;
+}
+
+@end

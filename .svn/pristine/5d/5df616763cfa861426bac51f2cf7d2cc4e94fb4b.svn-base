@@ -1,0 +1,107 @@
+//
+//  DHomeGoodsAllCell.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-23.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DHomeGoodsAllCell.h"
+#import "DHomeGoodsForm.h"
+#import "DHomeBlockView.h"
+
+#define top_spe_size    15
+#define left_spe_size   15
+#define labelFont_size  14
+
+#define head_size_height    2*top_spe_size+labelFont_size
+
+@implementation DHomeGoodsAllCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    [self.contentView setBackgroundColor:
+     [UIColor colorWithRed:250./255 green:249./255 blue:246./255 alpha:1.0]];
+    
+    _viewBlocks = [[NSMutableArray alloc]init];
+
+    UIView *headerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.frame.size.width, head_size_height)];
+    [headerView setBackgroundColor:[UIColor clearColor]];
+    [self.contentView addSubview:headerView];
+    
+    UIImageView *lineImageView = [[UIImageView alloc]initWithFrame:
+                                  CGRectMake(0, head_size_height-.5, self.frame.size.width, .5)];
+    [lineImageView setImage:[UIImage imageNamed:@"home_spe_line.png"]];
+    [headerView addSubview:lineImageView];
+    
+    _titleLabe = [[UILabel alloc]init];
+    [_titleLabe setFont:[UIFont fontWithName:@"Heiti SC" size:labelFont_size]];
+    _titleLabe.textAlignment = NSTextAlignmentLeft;
+    [_titleLabe setTextColor:[UIColor grayColor]];
+    _titleLabe.lineBreakMode = NSLineBreakByWordWrapping;
+    [_titleLabe setBackgroundColor:[UIColor clearColor]];
+    [self.contentView addSubview:_titleLabe];
+    [_titleLabe setFrame:CGRectMake(left_spe_size, top_spe_size, 150, 14)];
+    
+    
+    _moreImageView = [[DImageView alloc]init];
+    [_moreImageView setImage:[UIImage imageNamed:@"home_all_more.png"]];
+    _moreImageView.contentMode = UIViewContentModeScaleAspectFill;
+    _moreImageView.clipsToBounds = YES;
+    _moreImageView.userInteractionEnabled = YES;
+    [headerView addSubview:_moreImageView];
+    
+    CGSize imageSize = _moreImageView.image.size;
+    [_moreImageView setFrame:CGRectMake(self.frame.size.width-imageSize.width-left_spe_size,
+                                        top_spe_size+1,
+                                        imageSize.width,
+                                        imageSize.height)];
+
+    //
+    float bh = ([DHomeGoodsAllCell heightForCell] - head_size_height)/2 - 20;
+    DHomeBlockView *blockView = [[DHomeBlockView alloc]initWithFrame:CGRectMake(0, headerView.frame.origin.y+headerView.frame.size.height, self.frame.size.width, bh)];
+    blockView.tag = 0;
+    [_viewBlocks addObject:blockView];
+    [self.contentView addSubview:blockView];
+    
+    blockView = [[DHomeBlockView alloc]initWithFrame:CGRectMake(0, blockView.frame.origin.y+blockView.frame.size.height, self.frame.size.width, bh)];
+    blockView.tag = 1;
+    [_viewBlocks addObject:blockView];
+    [self.contentView addSubview:blockView];
+    
+    
+    return self;
+}
+
+- (void)setDataForCell:(id)data {
+    DHomeGoodsForm *goodsForm = (DHomeGoodsForm*)data;
+    [_titleLabe setText:goodsForm.title];
+    _moreImageView.tag = [goodsForm.serverId intValue];
+    _moreImageView.value = goodsForm.title;
+    
+    for (int i=0;i<_viewBlocks.count;i++) {
+        DHomeBlockView *blockView = [_viewBlocks objectAtIndex:i];
+        NSRange range = NSMakeRange (i*blockView.blocks.count, blockView.blocks.count);
+        NSIndexSet *se = [NSIndexSet indexSetWithIndexesInRange:range];
+        NSArray *productForms = [goodsForm.products objectsAtIndexes:se];
+        [blockView setDataForView:productForms];
+    }
+}
+
+- (void)setTapGesture:(id)delegate {
+    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc]
+                                    initWithTarget:delegate
+                                    action:@selector(clickedForMoreCateGoods:)];
+    
+    [_moreImageView addGestureRecognizer:tap];
+}
+
+- (void)clickedForMoreCateGoods:(UIGestureRecognizer*)gesture{}
+
+
++ (float)heightForCell {
+    return 400;
+}
+
+
+@end

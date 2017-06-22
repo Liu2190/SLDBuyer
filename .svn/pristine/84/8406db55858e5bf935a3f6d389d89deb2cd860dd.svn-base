@@ -1,0 +1,21 @@
+//
+//  GoodsOrderListCell.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-6.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface GoodsOrderListCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UIImageView *backGroundView;
+@property (weak, nonatomic) IBOutlet UIButton *orderTrackButton;
+@property (weak, nonatomic) IBOutlet UIButton *payButton;
+@property (weak, nonatomic) IBOutlet UILabel *orderStatusLabel;
+@property (weak, nonatomic) IBOutlet UILabel *orderNumLabel;
+@property (weak, nonatomic) IBOutlet UILabel *orderAmountLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *orderGoodsView;
+@property (weak, nonatomic) IBOutlet UILabel *orderDateLabel;
+-(void)setCellValueWith:(NSDictionary *)dict;
+@end

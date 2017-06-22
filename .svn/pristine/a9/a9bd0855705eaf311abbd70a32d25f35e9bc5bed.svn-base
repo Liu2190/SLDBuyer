@@ -1,0 +1,60 @@
+//
+//  DChecklistElement.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-18.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DChecklistElement.h"
+#import "DChecklistViewCell.h"
+
+@implementation DChecklistElement
+
+- (QRootElement *)init {
+    self = [super init];
+    _isSelected = NO;
+    
+    return self;
+}
+
+- (UITableViewCell *)getCellForTableView:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller {
+    QTableViewCell *cell = (QTableViewCell *) [super getCellForTableView:tableView controller:controller];
+    cell.accessoryView.autoresizesSubviews = NO;
+    UIImageView *indicatorView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"Shop_Indicator.png"]];
+    [indicatorView setFrame:CGRectMake(0, 0, 7.5, 7.5)];
+    cell.accessoryView = indicatorView;
+    
+    cell.selectionStyle = self.enabled ? UITableViewCellSelectionStyleBlue : UITableViewCellSelectionStyleNone;
+    cell.textLabel.text = _title;
+    [cell.textLabel setTextColor:[UIColor grayColor]];
+    
+    return cell;
+}
+
+- (void)selected:(QuickDialogTableView *)tableView controller:(QuickDialogController *)controller indexPath:(NSIndexPath *)path {
+    [super selected:tableView controller:controller indexPath:path];
+    [tableView deselectRowAtIndexPath:path animated:YES];
+    
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:path];
+    UIView *accessoryView = cell.accessoryView;
+    
+    [UIView animateWithDuration:.7 delay:0 options:0 animations: ^{
+        if (_isSelected) {
+            accessoryView.transform = CGAffineTransformRotate(accessoryView.transform, -M_PI_2);
+        } else {
+            accessoryView.transform = CGAffineTransformRotate(accessoryView.transform, M_PI_2);
+        }
+    } completion: ^(BOOL completed) {
+        
+    }];
+    
+    _isSelected = !_isSelected;
+}
+
+
+- (CGFloat)getRowHeightForTableView:(QuickDialogTableView *)tableView {
+    return _height > 0 ? _height : 40;
+}
+
+@end

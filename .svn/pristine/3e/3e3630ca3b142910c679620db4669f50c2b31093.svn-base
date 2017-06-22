@@ -1,0 +1,13 @@
+//
+//  OrderListModel.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-19.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DRecord.h"
+
+@interface OrderListModel : DRecord
+@property (nonatomic,retain)NSString *orderID;
+@end

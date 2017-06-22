@@ -1,0 +1,117 @@
+//
+//  DAddCarView.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-11.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DAddCarView.h"
+
+#define degreesToRadians(x)(M_PI*x/180.0)
+#define shop_car_width      150
+#define shop_car_height     150
+
+#define label_font_size     14
+
+@implementation DAddCarView
+
+- (id)initWithFrame:(CGRect)frame andGoodView:(UIView*)goodView {
+    self = [super initWithFrame:frame];
+    [self setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:.0]];
+   
+    UIView *bgView = [[UIView alloc]initWithFrame:CGRectMake(0, 64, self.frame.size.width, self.frame.size.height-64)];
+    [bgView setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:.5]];
+    [self addSubview:bgView];
+    
+    
+    _cardView = [[UIImageView alloc]initWithFrame:CGRectMake(bgView.frame.size.width-20,64,0, 0)];
+    [_cardView setImage:[UIImage imageNamed:@"home_shopCar.png"]];
+    [_cardView setBackgroundColor:[UIColor clearColor]];
+    
+    UILabel *descLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, shop_car_width, shop_car_height)];
+    descLabel.userInteractionEnabled = YES;
+    [descLabel setFont:[UIFont fontWithName:@"Heiti SC" size:label_font_size]];
+    descLabel.textAlignment = NSTextAlignmentCenter;
+    [descLabel setTextColor:[UIColor grayColor]];
+    descLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    descLabel.numberOfLines = 2;
+    [descLabel setBackgroundColor:[UIColor clearColor]];
+    [descLabel setText:@"拖到这里\n加入购物车"];
+    descLabel.alpha = 0;
+    [_cardView addSubview:descLabel];
+    [self addSubview:_cardView];
+    
+    [UIView animateWithDuration:.3 animations:^{
+        _cardView.frame = CGRectMake(bgView.frame.size.width-shop_car_width-5, 64, shop_car_width, shop_car_height);
+        _cardView.alpha = 1;
+    } completion:^(BOOL finished) {
+        descLabel.alpha = 1;
+    }];
+    
+
+    [self addSubview:goodView];
+    _startFrame = goodView.frame;
+    _startCenter = goodView.center;
+
+    return self;
+}
+
+- (void)moveAndEndAddCar:(void(^)(BOOL isAddCar))callback {
+    UIView *goodView = [[self subviews]lastObject];
+    UILabel *label = [[_cardView subviews]lastObject];
+    label.alpha = 0;
+    
+    [UIView animateWithDuration:.3 animations:^{
+        
+        if (_isAddCar) {
+            CGPoint center = CGPointMake(self.frame.size.width-20,30);
+            goodView.center = center;
+            goodView.transform = CGAffineTransformMakeScale(.05,.05);
+            goodView.alpha = 0;
+        } else {
+            goodView.center = _startCenter;
+            goodView.transform = CGAffineTransformMakeScale(1,1);
+            goodView.transform = CGAffineTransformMakeRotation(degreesToRadians(10));
+        }
+        
+        [_cardView setFrame:CGRectMake(self.frame.size.width-20,0,0, 0)];
+        _cardView.alpha = 0;
+    } completion:^(BOOL isAddCar) {
+        [UIView animateWithDuration:.2 animations:^{
+            if (_isAddCar) {
+                
+            } else {
+                goodView.transform = CGAffineTransformMakeRotation(degreesToRadians(0));
+            }
+            
+        } completion:^(BOOL isAddCar) {
+            ((void(^)(BOOL))callback)(_isAddCar);
+        }];
+        
+    }];
+}
+
+- (void)scalingByMoveY:(float)moveY {
+    if (_startFrame.origin.y < moveY) return;
+    UIView *goodView = [[self subviews]lastObject];
+    float scale = (_startFrame.origin.y-goodView.frame.origin.y)/_startFrame.origin.y;
+    goodView.transform = CGAffineTransformMakeScale(1-scale/3, 1-scale/3);
+    
+    BOOL isAddCar = CGRectIntersectsRect(goodView.frame,_cardView.frame);
+    if (isAddCar){
+        [self addCarAction:YES];
+    } else {
+        [self addCarAction:NO];
+    }
+}
+
+- (void)addCarAction:(BOOL)boolean {
+    UILabel *label = [[_cardView subviews]lastObject];
+    if(boolean)[label setText:@"释放后\n商品将被加入购物车"];
+    else [label setText:@"拖到这里\n加入购物车"];
+    
+    _isAddCar = boolean;
+}
+
+@end

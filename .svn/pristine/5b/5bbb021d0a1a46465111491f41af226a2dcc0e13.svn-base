@@ -1,0 +1,76 @@
+//
+//  GoodsOrderDetailViewController.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-17.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "GoodsOrderDetailViewController.h"
+#import "OrderInforCell.h"
+#import "OrderOwnerCell.h"
+#import "OrderPayCell.h"
+#import "OrderHeaderView.h"
+#import "OrderDeliveryCell.h"
+#import "OrderProductCell.h"
+
+#define section_count       6
+#define status_section      0
+#define sum_section         1
+#define list_section        2
+#define owner_section       3
+#define delivery_section    4
+#define payment_section     5
+
+@interface GoodsOrderDetailViewController ()
+
+@end
+
+@implementation GoodsOrderDetailViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        self.headerViewHeight = 35.0f;
+        self.title = @"订单详情";
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return section_count;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  //  static NSString *identifier = @"Cell";
+    return nil;
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

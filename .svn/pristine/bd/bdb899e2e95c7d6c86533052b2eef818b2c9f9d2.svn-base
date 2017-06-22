@@ -1,0 +1,109 @@
+//
+//  DMainRootContrller.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-21.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DMainRootContrller.h"
+#import "DLeftSideDrawerController.h"
+#import "DRightSideDrawerController.h"
+#import "DDrawerVisualStateManager.h"
+
+#import "DHomeLevelController.h"
+#import "DAccountLevelController.h"
+#import "DAboutLevelController.h"
+#import "DOrderLevelController.h"
+
+@implementation DMainRootContrller
+
++ (DMainRootContrller *)sharedManager {
+    static DMainRootContrller *sharedManager = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedManager = [[DMainRootContrller alloc] init];
+        sharedManager.statusBarStyle = UIStatusBarStyleLightContent;
+    });
+    
+    return sharedManager;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self.view setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+    NSMutableArray *levelControllers = [[NSMutableArray alloc]init];
+    NSLog(@"%@",self.view);
+    //
+    DHomeLevelController *homeLevel = [DHomeLevelController sharedInstance];
+    UINavigationController *navigationLevel = [[UINavigationController alloc] initWithRootViewController:homeLevel];
+    [levelControllers addObject:navigationLevel];
+    navigationLevel.navigationBar.translucent = NO;
+    [navigationLevel.view setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+    
+    //
+    DAccountLevelController *accountLevel = [DAccountLevelController sharedInstance];
+    navigationLevel = [[UINavigationController alloc] initWithRootViewController:accountLevel];
+    [levelControllers addObject:navigationLevel];
+    
+    //
+    DOrderLevelController *orderLevel = [DOrderLevelController sharedInstance];
+    navigationLevel = [[UINavigationController alloc] initWithRootViewController:orderLevel];
+    [levelControllers addObject:navigationLevel];
+    
+    //
+    DAboutLevelController *abountLevel = [DAboutLevelController sharedInstance];
+    navigationLevel = [[UINavigationController alloc] initWithRootViewController:abountLevel];
+    [levelControllers addObject:navigationLevel];
+    
+    DLeftSideDrawerController *leftController = [[DLeftSideDrawerController alloc]init];
+    _bracketController = [[DMainBracketController alloc]initWithLevelControllers:levelControllers leftDrawerController:leftController];
+
+    [_bracketController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeAll];
+    [_bracketController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeAll];
+    
+    [_bracketController setDrawerVisualStateBlock:
+     ^(MMDrawerController *drawerController, MMDrawerSide drawerSide, CGFloat percentVisible) {
+         
+         MMDrawerControllerDrawerVisualStateBlock block;
+         block = [[DDrawerVisualStateManager sharedManager]
+                  drawerVisualStateBlockForDrawerSide:drawerSide];
+         
+         if(block) block(drawerController, drawerSide, percentVisible);
+     }];
+
+    [self.view addSubview:_bracketController.view];
+    
+}
+
+-(UIStatusBarStyle)preferredStatusBarStyle {
+    return _statusBarStyle;
+}
+
+- (void)updateStatuBarColorByStyle:(UIStatusBarStyle)style {
+    _statusBarStyle = style;
+    [self setNeedsStatusBarAppearanceUpdate];
+}
+
+- (void)setOpenDrawerGesture:(BOOL)isOpen {
+    if (!isOpen) {
+        [_bracketController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeNone];
+    } else {
+        [_bracketController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeAll];
+    }
+}
+
+- (void)setCloseDrawerGesture:(BOOL)isOpen {
+    if (!isOpen) {
+        [_bracketController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeNone];
+    } else {
+        [_bracketController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeAll];
+    }
+}
+
+- (void)doHandlerLogining {
+    [((DLeftSideDrawerController*)_bracketController.leftDrawerViewController) hadLoginingDisplay];
+}
+
+
+@end

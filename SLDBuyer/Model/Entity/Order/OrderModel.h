@@ -1,0 +1,76 @@
+//
+//  OrderModel.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-19.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "NSDictionary+Json.h"
+
+typedef enum _AllOrderType
+{
+	WaitingForPaymentType = 0,      //待付款
+    WaitingForReceivingType = 1,    //待收货
+    FinishedReceivingType = 2,      //已完成
+    DuringRefundType = 3            //退款中
+} OrderType;
+@interface OrderModel : NSObject
+/**
+ * 订单id
+ */
+@property (nonatomic,retain)NSString *orderID;
+/**
+ * 订单总额
+ */
+@property (nonatomic,retain)NSString *orderAmount;
+/**
+ * 订单类型
+ */
+@property (nonatomic,assign)OrderType orderType;
+/**
+ * 下单时间
+ */
+@property (nonatomic,retain)NSString *orderGenerateDate;
+/**
+ * 订单内商品
+ */
+@property (nonatomic,retain)NSMutableArray *orderGoodsArray;
+/**
+ * 订单收货人名称
+ */
+@property (nonatomic,retain)NSString *name;
+/**
+ * 订单收货人手机号
+ */
+@property (nonatomic,retain)NSString *phone;
+/**
+ * 订单收货人地址
+ */
+@property (nonatomic,retain)NSString *address;
+/**
+ * 订单派送方式
+ */
+@property (nonatomic,retain)NSString *deliveryType;
+/**
+ * 自提时间
+ */
+@property (nonatomic,retain)NSString *ztTime;
+/**
+ * 自提超市
+ */
+@property (nonatomic,retain)NSString *ztMarket;
+/**
+ * 支付方式
+ */
+@property (nonatomic,retain)NSString *payment;
+/**
+ * 获取订单列表信息
+ */
+-(void)getListInforWith:(NSDictionary *)dict;
+/**
+ * 获取订单详情信息
+ */
+-(void)getDetailInforWith:(NSDictionary *)dict;
+@end

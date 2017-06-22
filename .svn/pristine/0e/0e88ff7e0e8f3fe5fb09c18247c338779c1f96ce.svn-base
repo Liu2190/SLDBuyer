@@ -1,0 +1,43 @@
+//
+//  DSaleCateViewController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-28.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DSaleCateViewController.h"
+
+@implementation DSaleCateViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    [self.view setBackgroundColor:[UIColor clearColor]];
+    
+    CGRect mainRect = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    mainScrollView = [[DHomeScrollView alloc]initWithFrame:mainRect andPageNum:2];
+    [mainScrollView setContentSize:CGSizeMake(mainRect.size.width, mainRect.size.height+1)];
+    mainScrollView.backgroundColor = [UIColor clearColor];
+    [self.view addSubview:mainScrollView];
+   
+    // sale
+    UIView *saleView = [mainScrollView getPageViewByPageIndex:0];
+    [saleView setBackgroundColor:[UIColor redColor]];
+    
+    // cate
+    UIView *cateView = [mainScrollView getPageViewByPageIndex:1];
+    [cateView setBackgroundColor:[UIColor blackColor]];
+    
+    [mainScrollView scrollPageByPageNum:_startIndex animated:NO];
+}
+
+- (void)scrollPageByPageNum:(int)pageNo animated:(BOOL)animated{
+    [mainScrollView scrollPageByPageNum:pageNo animated:animated];
+}
+
+@end

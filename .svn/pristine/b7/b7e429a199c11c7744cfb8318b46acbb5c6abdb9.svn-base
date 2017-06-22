@@ -1,0 +1,57 @@
+//
+//  DAddCarView.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-11.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DAddCarView.h"
+
+#define degreesToRadians(x)(M_PI*x/180.0)
+
+@implementation DAddCarView
+
+- (id)initWithFrame:(CGRect)frame andGoodView:(UIView*)goodView {
+    self = [super initWithFrame:frame];
+    [self setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:.0]];
+   
+    UIView *bgView = [[UIView alloc]initWithFrame:CGRectMake(0, 64, self.frame.size.width, self.frame.size.height-64)];
+    [bgView setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:.5]];
+    [self addSubview:bgView];
+    
+    
+    [self addSubview:goodView];
+    _startFrame = goodView.frame;
+    _startCenter = goodView.center;
+
+    return self;
+}
+
+- (void)moveAndEndAddCar:(void(^)(BOOL isFinish))callback {
+    UIView *goodView = [[self subviews]lastObject];
+    
+    [UIView animateWithDuration:.3 animations:^{
+        goodView.center = _startCenter;
+        goodView.transform = CGAffineTransformMakeScale(1,1);
+        
+        goodView.transform = CGAffineTransformMakeRotation(degreesToRadians(20));
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:.2 animations:^{
+            goodView.transform = CGAffineTransformMakeRotation(degreesToRadians(0));
+        } completion:^(BOOL finished) {
+            ((void(^)(BOOL))callback)(YES);
+        }];
+        
+    }];
+}
+
+- (void)scalingByMoveY:(float)moveY {
+    if (_startFrame.origin.y < moveY) return;
+    UIView *goodView = [[self subviews]lastObject];
+    float scale = (_startFrame.origin.y-goodView.frame.origin.y)/_startFrame.origin.y;
+    goodView.transform = CGAffineTransformMakeScale(1-scale/3, 1-scale/3);
+}
+
+
+@end

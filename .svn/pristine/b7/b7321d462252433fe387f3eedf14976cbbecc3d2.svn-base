@@ -1,0 +1,57 @@
+//
+//  DBHandler.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-6.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DBHandler.h"
+#import "DVersionServer.h"
+#import "DVersion.h"
+
+@implementation DBHandler
+
++ (DBHandler *)sharedInstance {
+    static DBHandler *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[DBHandler alloc] init];
+    });
+    
+    return sharedInstance;
+}
+
+/**
+ * 实例生产环境
+ */
+- (void)buildProductSetting {
+    NSMutableArray *versions = [[NSMutableArray alloc]init];
+    
+    // 商品分类版本对象
+    DVersion *cateVersion = [[DVersion alloc]init];
+    cateVersion.dbName = @"D_CATE";
+    cateVersion.version = @"0";
+    cateVersion.lastUpdateTime = [[DUtilities sharedInstance]stringLongFromDate:[NSDate date]];
+    cateVersion.isSys = NO;
+    cateVersion.desc = @"商品分类版本表";
+    
+    // 购物车版本对象
+    DVersion *shopCarVersion = [[DVersion alloc]init];
+    shopCarVersion.dbName = @"D_CATE";
+    shopCarVersion.version = @"0";
+    shopCarVersion.lastUpdateTime = [[DUtilities sharedInstance]stringLongFromDate:[NSDate date]];
+    shopCarVersion.isSys = NO;
+    shopCarVersion.desc = @"购物车版本表";
+    
+    [versions addObject:cateVersion];
+    [versions addObject:shopCarVersion];
+    
+    [[TServerFactory getServerInstance:@"DVersionServer"]insertObjectsWithRecords:versions];
+}
+
+- (void)startUpdateVersionData {
+    
+}
+
+@end

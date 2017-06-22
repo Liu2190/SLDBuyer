@@ -1,0 +1,165 @@
+//
+//  CreateAddressView.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "CreateAddressView.h"
+#define easyToRemember_placeholder @"设置一个易记的名字，如“家”，“公司地址”"
+#define name_placeholder @"收货人姓名"
+#define phone_placeholder @"手机号"
+#define address_placeholder @"详细地址"
+@interface CreateAddressView ()
+{
+    BOOL tipsStatus;
+    BOOL nameStatus;
+    BOOL phoneStatus;
+    BOOL detailAddressStatus;
+}
+@end
+@implementation CreateAddressView
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code
+        tipsStatus = NO;
+        nameStatus = NO;
+        phoneStatus = NO;
+        detailAddressStatus = NO;
+    }
+    return self;
+}
+
+-(void)awakeFromNib
+{
+    CGRect frame = self.tipsTextField.frame;
+    _tipsControl = [[TDbuyerFieldController alloc]initWithPlaceholder:easyToRemember_placeholder andFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+    [_tipsControl setKeyboardType:UIKeyboardTypeDefault];
+    UIFont *font = self.tipsTextField.font;
+    [_tipsControl setFont:font];
+    [_tipsControl setIsValidation:NO];
+    [self.tipsTextField addSubview:_tipsControl.view];
+    
+    frame = self.phoneTextField.frame;
+    _phoneControl = [[TDbuyerFieldController alloc]initWithPlaceholder:phone_placeholder andFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+    [_phoneControl setKeyboardType:UIKeyboardTypePhonePad];
+    font = self.phoneTextField.font;
+    [_phoneControl setFont:font];
+    [_phoneControl setIsValidation:YES];
+    [self.phoneTextField addSubview:_phoneControl.view];
+    
+    frame = self.nameTextField.frame;
+    _nameControl = [[TDbuyerFieldController alloc]initWithPlaceholder:name_placeholder andFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+    [_nameControl setKeyboardType:UIKeyboardTypeDefault];
+    font = self.nameTextField.font;
+    [_nameControl setFont:font];
+    [_nameControl setIsValidation:YES];
+    [self.nameTextField addSubview:_nameControl.view];
+    
+    frame = self.detailAddressTextField.frame;
+    _detailControl = [[TDbuyerFieldController alloc]initTextViewWithPlaceholder:address_placeholder andFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+    [_detailControl setKeyboardType:UIKeyboardTypeDefault];
+    font = self.detailAddressTextField.font;
+    [_detailControl setFont:font];
+    [_detailControl setIsValidation:YES];
+    [self.detailAddressTextField addSubview:_detailControl.view];
+}
+/*
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect
+{
+    // Drawing code
+}
+*/
+
+- (void)setTargetAction:(id)target
+{
+    [_tipsControl setTextFieldDelegate:target];
+    [_nameControl setTextFieldDelegate:target];
+    [_phoneControl setTextFieldDelegate:target];
+    [_detailControl setTextFieldDelegate:target];
+    [[_tipsControl getDbuyerTextField] addTarget:target action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+    [[_nameControl getDbuyerTextField] addTarget:target action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+    [[_phoneControl getDbuyerTextField] addTarget:target action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+}
+- (void) textFieldDidChange:(UITextField *) textField {}
+- (void)loginBtnAction:(id)sender {}
+- (BOOL)updateByTextView:(UITextView *)textView
+{
+    BOOL isValida = YES;
+        if (textView.text.length == 0) {
+            [_detailControl changeValidationValue:Input_NO andText:@"详细地址不能为空"];
+            isValida = NO;
+        } else {
+            [_detailControl changeValidationValue:Input_YES andText:@""];
+            isValida = YES;
+        }
+    detailAddressStatus = isValida;
+    [self.delegate AllStatus:((detailAddressStatus && nameStatus) && phoneStatus )];
+    return isValida;
+}
+- (BOOL)updateByTextField:(UITextField*)field {
+    BOOL isValida = YES;
+    
+    if([field.placeholder isEqualToString:phone_placeholder]) {
+        if (field.text.length == 0) {
+            [_phoneControl changeValidationValue:Input_NO andText:@"手机号不能为空"];
+            isValida = NO;
+        } else if(field.text.length < 11) {
+            [_phoneControl changeValidationValue:Input_NO andText:@"请准确填写11位手机号码"];
+            isValida = NO;
+        } else if(field.text.length > 11) {
+            [_phoneControl changeValidationValue:Input_NO andText:@"请准确填写11位手机号码"];
+            isValida = NO;
+        } else if (field.text.length == 11 && [field.text isMatchedByRegex:PhoneRegex]==NO) {
+            [_phoneControl changeValidationValue:Input_NO andText:@"请准确填写11位手机号码"];
+            isValida = NO;
+        } else if([field.text isMatchedByRegex:PhoneRegex]==YES){
+            [_phoneControl changeValidationValue:Input_YES andText:@"请准确填写11位手机号码"];
+        } else {
+            [_phoneControl changeValidationValue:Input_Default andText:@""];
+            isValida = NO;
+        }
+        phoneStatus = isValida;
+    }
+    
+    if([field.placeholder isEqualToString:name_placeholder]) {
+        if (field.text.length == 0) {
+            [_nameControl changeValidationValue:Input_NO andText:@"收货人姓名不能为空"];
+            isValida = NO;
+        } else {
+            [_nameControl changeValidationValue:Input_YES andText:@""];
+            isValida = YES;
+        }
+        nameStatus = isValida;
+    }
+    if([field.placeholder isEqualToString:address_placeholder]) {
+        if (field.text.length == 0) {
+            [_detailControl changeValidationValue:Input_NO andText:@"详细地址不能为空"];
+            isValida = NO;
+        } else {
+            [_detailControl changeValidationValue:Input_YES andText:@""];
+            isValida = YES;
+        }
+        detailAddressStatus = isValida;
+    }
+    [self.delegate AllStatus:((detailAddressStatus && nameStatus) && phoneStatus )];
+    return isValida;
+}
+-(void)cancelKeyboard
+{
+    [self.tipsTextField resignFirstResponder];
+    [self.nameTextField resignFirstResponder];
+    [self.phoneTextField resignFirstResponder];
+    [self.detailAddressTextField resignFirstResponder];
+}
+-(void)setPlaceHolderHiddenWith:(BOOL)status
+{
+    [_detailControl setTextViewPlaceHolderHiddenWithStatus:status];
+}
+@end

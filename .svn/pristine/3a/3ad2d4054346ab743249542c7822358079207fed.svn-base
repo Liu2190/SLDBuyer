@@ -1,0 +1,320 @@
+//
+//  DShopGoodsListController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-27.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DShopGoodsListController.h"
+#import "DMainRootContrller.h"
+#import "DShopFlowViewController.h"
+#import "DOrderConfirmController.h"
+#import "UIButton+Extensions.h"
+
+#import "DGoodsServer.h"
+#import "DShopCarViewCell.h"
+
+#import "DGoods.h"
+#import "DHomeShopController.h"
+#import "DPopupHandler.h"
+#import "UIViewController+MJPopupViewController.h"
+
+#define toolbar_height                  70
+#define labelFont_size                  14
+#define confimBuyer_labelFont_size      18
+
+@implementation DShopGoodsListController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self.view setBackgroundColor:[UIColor whiteColor]];
+    [[DMainRootContrller sharedManager]updateStatuBarColorByStyle:UIStatusBarStyleDefault];
+    _datas = [[NSMutableArray alloc]init];
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    self.title = @"购物车";
+    
+    [self addLeftButtonItem];
+    [self addRightButtonItem];
+    
+    NSArray *allRecords = [[TServerFactory getServerInstance:@"DGoodsServer"]selectAllRecord];
+    [_datas addObjectsFromArray:allRecords];
+    if (_datas.count == 0) {
+        [self.view addSubview:[self genEmptyView]];
+        return;
+    }
+
+    float t_w = self.view.frame.size.width;
+    float t_h = self.view.frame.size.height - toolbar_height;
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, t_w, t_h) style:UITableViewStyleGrouped];
+    _tableView.separatorInset = UIEdgeInsetsMake(0, 0, 0, 0);
+    [_tableView setSeparatorColor:[UIColor colorWithRed:0 green:0.0 blue:0.0 alpha:.05]];
+    [_tableView setBackgroundColor:[UIColor colorWithRed:250./255 green:249./255 blue:246./255 alpha:1]];
+    _tableView.dataSource = self;
+    _tableView.delegate = self;
+    [self.view addSubview:_tableView];
+    
+    float tool_y = self.view.frame.size.height-toolbar_height;
+    _toolbarView = [[UIView alloc]initWithFrame:CGRectMake(0, tool_y, self.view.frame.size.width, toolbar_height)];
+    [_toolbarView setBackgroundColor:[UIColor whiteColor]];
+    [self.view addSubview:_toolbarView];
+    
+    UIImageView *lineImageView = [[UIImageView alloc]initWithFrame:
+                                  CGRectMake(0, 0, _toolbarView.frame.size.width, .5)];
+    [lineImageView setImage:[UIImage imageNamed:@"home_spe_line.png"]];
+    [_toolbarView addSubview:lineImageView];
+    
+    UIView *buyerAreaView = [[UIView alloc]initWithFrame:CGRectMake(10, 10, _toolbarView.frame.size.width-2*10, _toolbarView.frame.size.height-2*10)];
+    buyerAreaView.layer.cornerRadius = 3;
+    buyerAreaView.layer.masksToBounds = YES;
+    [buyerAreaView setBackgroundColor:[UIColor colorWithRed:82./255.0 green:160.0/255 blue:73.0/255. alpha:1]];
+    [_toolbarView addSubview:buyerAreaView];
+
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
+                                   initWithTarget:self action:@selector(doSubmitOrder)];
+    [buyerAreaView addGestureRecognizer:tap];
+    
+    UILabel *affirmBuyerLabel = [[UILabel alloc]init];
+    [affirmBuyerLabel setText:@"确认购买"];
+    [affirmBuyerLabel setFont:[UIFont systemFontOfSize:confimBuyer_labelFont_size]];
+    affirmBuyerLabel.textAlignment = NSTextAlignmentCenter;
+    [affirmBuyerLabel setTextColor:[UIColor whiteColor]];
+    affirmBuyerLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    [affirmBuyerLabel setBackgroundColor:[UIColor clearColor]];
+    [buyerAreaView addSubview:affirmBuyerLabel];
+    
+    
+    CGSize titleSize = CGSizeMake(self.view.frame.size.width, 20000.0f);
+    NSDictionary * tdic = [NSDictionary dictionaryWithObjectsAndKeys:affirmBuyerLabel.font,
+                           NSFontAttributeName,nil];
+    titleSize =[affirmBuyerLabel.text boundingRectWithSize:titleSize options:NSStringDrawingUsesLineFragmentOrigin |NSStringDrawingUsesFontLeading attributes:tdic context:nil].size;
+    [affirmBuyerLabel setFrame:CGRectMake((buyerAreaView.frame.size.width-titleSize.width)/2-20, (buyerAreaView.frame.size.height-titleSize.height)/2, titleSize.width, titleSize.height)];
+    
+    UIView *totalPriceView = [[UIView alloc]initWithFrame:CGRectMake(affirmBuyerLabel.frame.origin.x+affirmBuyerLabel.frame.size.width+20, 8, 100, buyerAreaView.frame.size.height-2*8)];
+    totalPriceView.layer.cornerRadius = 3;
+    totalPriceView.layer.masksToBounds = YES;
+    [totalPriceView setBackgroundColor:[UIColor colorWithRed:64./255.0 green:138.0/255 blue:57.0/255. alpha:1.0]];
+    [buyerAreaView addSubview:totalPriceView];
+    
+    _totalPriceLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, totalPriceView.frame.size.width, totalPriceView.frame.size.height)];
+    float totalPrice = [self calculateTotalPrice];
+    [_totalPriceLabel setText:[NSString stringWithFormat:@"￥%.2f",totalPrice]];
+    [_totalPriceLabel setFont:[UIFont fontWithName:@"Heiti SC" size:labelFont_size]];
+    _totalPriceLabel.textAlignment = NSTextAlignmentCenter;
+    [_totalPriceLabel setTextColor:[UIColor whiteColor]];
+    _totalPriceLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    [_totalPriceLabel setBackgroundColor:[UIColor clearColor]];
+    [totalPriceView addSubview:_totalPriceLabel];
+}
+
+- (void)doSubmitOrder {
+    DOrderConfirmController *orderConfirmController = [[DOrderConfirmController alloc]init];
+    [self.navigationController pushViewController:orderConfirmController animated:YES];
+}
+
+- (void)doLeftItemAction {
+    [[DMainRootContrller sharedManager]updateStatuBarColorByStyle:UIStatusBarStyleLightContent];
+    [self.navigationController dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+}
+
+- (void)doRightItemAction {
+    DShopFlowViewController *shopFlowController = [[DShopFlowViewController alloc]init];
+    [self.navigationController pushViewController:shopFlowController animated:YES];
+}
+
+- (void)addLeftButtonItem {
+    UIButton *leftButton = [[UIButton alloc]initWithFrame:CGRectMake(0,0,25,25)];
+    [leftButton setImage:[UIImage imageNamed:@"Nav_Close_Green.png"]forState:UIControlStateNormal];
+    [leftButton addTarget:self action:@selector(doLeftItemAction)forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *leftBtnItem = [[UIBarButtonItem alloc]initWithCustomView:leftButton];
+    self.navigationItem.leftBarButtonItem= leftBtnItem;
+}
+
+- (void)addRightButtonItem {
+    UIButton *rightButton = [[UIButton alloc]initWithFrame:CGRectMake(0,0,25,25)];
+    [rightButton setImage:[UIImage imageNamed:@"Shop_Flow.png"]forState:UIControlStateNormal];
+    [rightButton addTarget:self action:@selector(doRightItemAction)forControlEvents:UIControlEventTouchUpInside];
+    [rightButton setHitTestEdgeInsets:UIEdgeInsetsMake(-10, -20, -10, -10)];
+    UIBarButtonItem *rightBtnItem = [[UIBarButtonItem alloc]initWithCustomView:rightButton];
+    self.navigationItem.rightBarButtonItem= rightBtnItem;
+}
+
+#pragma mark - Table view data source
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return _datas.count>0?_datas.count:0;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    float h = [self tableView:tableView heightForHeaderInSection:section];
+    UIView *sectionView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, h)];
+    [sectionView setBackgroundColor:[UIColor colorWithRed:244./255. green:244/255. blue:244/255. alpha:1]];
+    
+    UILabel *titleLabel = [[UILabel alloc]init];
+    [titleLabel setText:@"运费提示区,提示用户是否符合免费规则"];
+    [titleLabel setFont:[UIFont fontWithName:@"Heiti SC" size:labelFont_size]];
+    titleLabel.textAlignment = NSTextAlignmentCenter;
+    [titleLabel setTextColor:[UIColor colorWithRed:82./255.0 green:160.0/255 blue:73.0/255. alpha:1.0]];
+    titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    [titleLabel setBackgroundColor:[UIColor clearColor]];
+    [sectionView addSubview:titleLabel];
+    
+    
+    CGSize titleSize = CGSizeMake(self.view.frame.size.width, 20000.0f);
+    NSDictionary * tdic = [NSDictionary dictionaryWithObjectsAndKeys:titleLabel.font, NSFontAttributeName,nil];
+    titleSize =[titleLabel.text boundingRectWithSize:titleSize options:NSStringDrawingUsesLineFragmentOrigin |NSStringDrawingUsesFontLeading attributes:tdic context:nil].size;
+    [titleLabel setFrame:CGRectMake(20, (h-titleSize.height)/2, titleSize.width, titleSize.height)];
+    
+    return sectionView;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *reuseIdentifier = @"cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+    
+    if (cell == nil) {
+        cell = [[DShopCarViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+    }
+    
+    DGoods *goods = [_datas objectAtIndex:indexPath.row];
+    [((DShopCarViewCell*)cell) setDataForCell:goods];
+    
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 30;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return [DShopCarViewCell heightForCell];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    DGoods *goods = [_datas objectAtIndex:indexPath.row];
+    
+    DShopAddGoodsController *addNumController = [[DShopAddGoodsController alloc]initWithGoods:goods];
+    addNumController.delegate = self;
+    id navi = [[DPopupHandler sharedInstance]genPopupNavigation:addNumController width:280 height:320];
+    [self presentPopupViewController:navi animationType:MJPopupViewAnimationSlideBottomBottom];
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    return YES;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return @"删除";
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        DGoods *goods = [_datas objectAtIndex:indexPath.row];
+        [[TServerFactory getServerInstance:@"DGoodsServer"]deleteByServerId:goods.serverId];
+        
+        [_datas removeObjectAtIndex:indexPath.row];
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        
+        [[DHomeShopController sharedInstance]updateRemindNum];
+        if (_datas.count == 0) {
+            [_tableView removeFromSuperview];
+            [_toolbarView removeFromSuperview];
+            [self.view addSubview:[self genEmptyView]];
+        }
+        float totalPrice = [self calculateTotalPrice];
+        [_totalPriceLabel setText:[NSString stringWithFormat:@"￥%.2f",totalPrice]];
+    }
+}
+
+- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return UITableViewCellEditingStyleDelete;
+}
+
+- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+    return YES;
+}
+
+
+- (void)setDefaultNavigationStyle {
+    UIColor *navBgColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1.0];
+
+    [self.navigationController.navigationBar setBarTintColor:navBgColor];
+    self.navigationController.navigationBar.translucent = NO;
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label.text = @"购物车";
+    label.backgroundColor = [UIColor clearColor];
+    label.font = [UIFont boldSystemFontOfSize:20.0];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.textColor = [UIColor colorWithRed:114./255.0 green:178.0/255 blue:110/255. alpha:1.0];
+    self.navigationItem.titleView = label;
+    [label sizeToFit];
+}
+
+- (float)calculateTotalPrice {
+    float totalPrice = .0f;
+    
+    for (DGoods *goods in _datas) {
+        totalPrice += [self calculateLittlePrice:goods];
+    }
+    
+    return totalPrice;
+}
+
+- (float)calculateLittlePrice:(DGoods*)goods {
+    float littlePrice = goods.sellPrice * goods.goodsNum;
+    return littlePrice;
+}
+
+- (UIView*)genEmptyView {
+    UIView *emptyView = [[UIView alloc]initWithFrame:
+                         CGRectMake(0, 0, self.view.frame.size.width,
+                                    self.view.frame.size.height)];
+    [self.view addSubview:emptyView];
+    
+    UILabel *descLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0,emptyView.frame.size.width, 100)];
+    [descLabel setFont:[UIFont systemFontOfSize:18]];
+    [descLabel setText:@"您还没有选购任何商品"];
+    descLabel.textAlignment = NSTextAlignmentCenter;
+    [descLabel setTextColor:[UIColor grayColor]];
+    descLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    descLabel.numberOfLines = 1;
+    [descLabel setBackgroundColor:[UIColor clearColor]];
+    [emptyView addSubview:descLabel];
+    
+    
+    UIImage *emptyImage = [UIImage imageNamed:@"Shop_emptyCar.png"];
+    float x = (emptyView.frame.size.width-emptyImage.size.width)/2.;
+    UIImageView *emptyCar = [[UIImageView alloc]initWithFrame:CGRectMake(x, 100, emptyImage.size.width, emptyImage.size.height)];
+    emptyCar.image = emptyImage;
+    [emptyView addSubview:emptyCar];
+    
+    UIImage *goshopImage_def = [UIImage imageNamed:@"Shop_goShop_def.png"];
+    UIImage *goshopImage_sel = [UIImage imageNamed:@"Shop_goShop_sel.png"];
+    
+    x = (emptyView.frame.size.width - goshopImage_def.size.width)/2.0;
+    float y = emptyCar.frame.size.height + emptyCar.frame.origin.y + 50;
+    UIButton *goShopBtn = [[UIButton alloc]initWithFrame:CGRectMake(x, y,goshopImage_def.size.width, goshopImage_def.size.height)];
+    [goShopBtn setBackgroundImage:goshopImage_def forState:UIControlStateNormal];
+    [goShopBtn setBackgroundImage:goshopImage_sel forState:UIControlStateHighlighted];
+    [goShopBtn addTarget:self action:@selector(doLeftItemAction) forControlEvents:UIControlEventTouchUpInside];
+    [emptyView addSubview:goShopBtn];
+    
+    return emptyView;
+}
+
+- (void)cancelButtonClicked:(id)controller {
+    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationSlideTopBottom];
+}
+
+@end

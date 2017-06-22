@@ -1,0 +1,186 @@
+//
+//  DHomeAllController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-23.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DHomeAllController.h"
+#import "DHomeGoodsBannerCell.h"
+#import "DHomeGoodsAllCell.h"
+#import "DDetailViewController.h"
+#import "DCateGoodsListController.h"
+#import "DHomeServer.h"
+
+#import "DHomeGoodsForm.h"
+#import "DHomeBannerForm.h"
+
+#define tabBar_height_size  45
+
+@implementation DHomeAllController
+
+- (id)initWithDelegate:(id)delegate {
+    self = [super init];
+    self.homeDelegate = delegate;
+    
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.goodsAllDatas = [[NSMutableArray alloc]init];
+    self.goodsBannerDatas = [[NSMutableArray alloc]init];
+    
+    CGRect rect = CGRectMake(0, 0, self.view.frame.size.width, tabBar_height_size);
+    NSDictionary *tabSale = @{@"image":@"home_tab_sale.jpeg",@"title":@"促销商品"};
+    NSDictionary *tabCate = @{@"image":@"home_tab_cate.jpeg",@"title":@"促销分类"};
+    NSArray *tabTitles = @[tabSale,tabCate];
+    _tabBarView = [[DHomeTabBarView alloc]initWithFrame:rect andTitles:tabTitles];
+    [_tabBarView setHomeDelegate:self.homeDelegate];
+    [self.view addSubview:_tabBarView];
+    
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, tabBar_height_size, self.view.frame.size.width, self.view.frame.size.height-tabBar_height_size)];
+    [_tableView setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+    [_tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    _tableView.allowsSelection = NO;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    [self.view addSubview:_tableView];
+    
+    [[TServerFactory getServerInstance:@"DHomeServer"]doSelectBannerRecordByCallback:^(NSArray *datas) {
+        [self.goodsBannerDatas setArray:datas];
+        [_tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+    } failureCallback:^(NSString *resp) {
+        [[DUtilities sharedInstance]popMessageError:resp target:self.view delayTime:1.5];
+    }];
+    
+    [self queryProductsByOneCate:0];
+}
+
+- (void)queryProductsByOneCate:(int)versionNo {
+    [[DUtilities sharedInstance]popTarget:self.view];
+    [[TServerFactory getServerInstance:@"DHomeServer"]
+     queryProductsByOneCateByVersionNo:versionNo andCallBack:^(NSArray *datas) {
+         [[DUtilities sharedInstance]dismiss];
+         for (DHomeGoodsForm *goodsForm in datas) [self.goodsAllDatas addObject:goodsForm];
+         
+         [_tableView reloadData];
+     } failureCallback:^(NSString *resp) {
+         [[DUtilities sharedInstance]popMessageError:resp target:self.view delayTime:1.5];
+     }];
+}
+
+- (void)initICE {
+    ICETutorialLabelStyle *subStyle = [[ICETutorialLabelStyle alloc] init];
+    [subStyle setFont:TUTORIAL_SUB_TITLE_FONT];
+    [subStyle setTextColor:TUTORIAL_LABEL_TEXT_COLOR];
+    [subStyle setLinesNumber:TUTORIAL_SUB_TITLE_LINES_NUMBER];
+    [subStyle setOffset:TUTORIAL_SUB_TITLE_OFFSET];
+    
+    ICETutorialLabelStyle *descStyle = [[ICETutorialLabelStyle alloc] init];
+    [descStyle setFont:TUTORIAL_DESC_FONT];
+    [descStyle setTextColor:TUTORIAL_LABEL_TEXT_COLOR];
+    [descStyle setLinesNumber:TUTORIAL_DESC_LINES_NUMBER];
+    [descStyle setOffset:TUTORIAL_DESC_OFFSET];
+    
+    CGRect iceRect = CGRectMake(0, 0, self.view.frame.size.width, [DHomeGoodsBannerCell heightForCell]);
+    NSMutableArray *pages = [[NSMutableArray alloc]init];
+    for (DHomeBannerForm *bannerForm in self.goodsBannerDatas) {
+        ICETutorialPage *page = [self genICETPages:bannerForm];
+        [pages addObject:page];
+    }
+    
+    _iceController = [[ICETutorialController alloc] initWithFrame:iceRect andPages:pages];
+    [_iceController setCommonPageSubTitleStyle:subStyle];
+    [_iceController setCommonPageDescriptionStyle:descStyle];
+    [_iceController startScrolling];
+}
+
+- (ICETutorialPage*)genICETPages:(DHomeBannerForm*)bannerForm {
+    ICETutorialPage *ICEPage = [[ICETutorialPage alloc] initWithSubTitle:@"热销中"
+                                                             description:bannerForm.sharetext
+                                                             pictureName:bannerForm.imgURL];
+    
+    return ICEPage;
+}
+
+#pragma mark - Table view data source
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if (section ==0) return self.goodsBannerDatas.count>0?1:0;
+    if (section == 1) return _goodsAllDatas.count;
+    
+    return 0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) return [DHomeGoodsBannerCell heightForCell];
+    if (indexPath.section == 1) return [DHomeGoodsAllCell heightForCell];
+    
+    return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *goodScroll_reuseIdentifier = @"HomeGoodsBannerCell";
+    static NSString *goodsAll_reuseIdentifier = @"HomeGoodsAllCell";
+    
+    NSString *reuseIdentifier = goodsAll_reuseIdentifier;
+    if (indexPath.section == 0) reuseIdentifier = goodScroll_reuseIdentifier;
+
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+    if (cell == nil) {
+        if (indexPath.section == 0) {
+            cell = [[DHomeGoodsBannerCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+        }
+        
+        if (indexPath.section == 1) {
+            cell = [[DHomeGoodsAllCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+        }
+    }
+    
+    if (indexPath.section == 0) {
+        if (self.goodsBannerDatas.count > 0) {
+            if (_iceController == nil) {
+                [self initICE];
+                [cell addSubview:_iceController.view];
+            }
+        }
+    }
+    
+    if (indexPath.section == 1) {
+        DHomeGoodsForm *allGoodsForm = [self.goodsAllDatas objectAtIndex:indexPath.row];
+        [((DTableViewCell*)cell) setDataForCell:allGoodsForm];
+    }
+    
+    
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [_tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    if (indexPath.section == 0) {
+        DCateGoodsListController *cateGoodsList = [[DCateGoodsListController alloc]init];
+        [self.navigationController pushViewController:cateGoodsList animated:YES];
+        return;
+    }
+    
+    [self.homeDelegate openDetailController];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)setDefaultNavigationStyle {}
+
+- (void)resetLayout {
+    [_tabBarView resetLayout];
+}
+
+@end

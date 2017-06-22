@@ -1,0 +1,148 @@
+//
+//  DHomeLevelController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-21.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DHomeLevelController.h"
+#import "DDetailViewController.h"
+#import "DHomeAllController.h"
+#import "DMainRootContrller.h"
+#import "DShopGoodsListController.h"
+#import "DSearchBar.h"
+
+#import "DHomeProductBlockView.h"
+#import "DHomeGoodsAllCell.h"
+#import "DHomeBlockView.h"
+#import "DGoodDetailForm.h"
+
+
+@implementation DHomeLevelController
+
++ (id)sharedInstance {
+    static DHomeLevelController *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[DHomeLevelController alloc] init];
+    });
+    
+    return sharedInstance;
+}
+
+- (id)init {
+    self = [super init];
+    self.menuTitle = @"购物专区";
+    self.menuImage = @"Bracket_Home.png";
+    
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(doGoodsClicked:)
+                                                 name:@"NotificationGoodsClicked" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(doGoodsLongPress:)
+                                                 name:@"NotificationGoodsLongPress" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(doStartAnimation:)
+                                                 name:@"NotificationStartAnimation" object:nil];
+}
+
+/**
+ * 商品列表项被Tap点击
+ */
+- (void)doGoodsClicked:(NSNotification *)notification {
+    
+    NSDictionary *userInfo = notification.userInfo;
+    DGoodDetailForm *detailForm = [userInfo objectForKey:@"DetailForm"];
+    homeBlockId = [[userInfo objectForKey:@"HomeBlockID"]intValue];
+    blockId = [[userInfo objectForKey:@"BlockID"]intValue];
+    
+    homeGoodsAllCell = notification.object;
+    DHomeBlockView *homeBlockView = [homeGoodsAllCell.viewBlocks objectAtIndex:homeBlockId];
+    DHomeProductBlockView *productBlockView = [homeBlockView.blocks objectAtIndex:blockId];
+    
+    UIImageView *imageview = productBlockView.productImageView;
+    imageview.hidden = YES;
+    startAnimationFrame = [productBlockView convertRect:imageview.frame toView:self.view];
+    DDetailViewController *detailController = [[DDetailViewController alloc]
+                                               initWithFrame:startAnimationFrame
+                                               andProductImage:imageview.image andDetailForm:detailForm];
+    
+    UINavigationController *navigation = [[UINavigationController alloc]initWithRootViewController:detailController];
+    [self.navigationController addChildViewController:navigation];
+    [self.navigationController.view addSubview:navigation.view];
+    [self.navigationController didMoveToParentViewController:self];
+    
+    CGRect frame = startAnimationFrame;
+    frame.size.width = 126;
+    frame.size.height = 126;
+    
+    frame.origin.x = (self.view.frame.size.width-frame.size.width)/2;
+    frame.origin.y = 0;
+    
+    _animationImageView = [[UIImageView alloc]initWithFrame:frame];
+    _animationImageView.image = imageview.image;
+    [self.view addSubview:_animationImageView];
+}
+
+/**
+ * 商品列表项被长按
+ */
+- (void)doGoodsLongPress:(NSNotification *)notification {
+    
+}
+
+
+- (void)doStartAnimation:(NSNotification *)notification {
+    [UIView animateWithDuration:0.3 animations:^{
+        CGRect frame = startAnimationFrame;
+        _animationImageView.frame = frame;
+    } completion:^(BOOL finished) {
+        DHomeBlockView *homeBlockView = [homeGoodsAllCell.viewBlocks objectAtIndex:homeBlockId];
+        DHomeProductBlockView *productBlockView = [homeBlockView.blocks objectAtIndex:blockId];
+        
+        productBlockView.productImageView.image = _animationImageView.image;
+        productBlockView.productImageView.hidden = NO;
+        [_animationImageView removeFromSuperview];
+    }];
+}
+
+- (void)openCateGoodsList:(int)cateId andTitle:(NSString*)title {
+    UIColor *bgColor = [UIColor colorWithRed:64./255.0 green:138.0/255 blue:57.0/255. alpha:1.0];
+    [_theSearchBar resetPropertyByBgColor:bgColor andplaceHolderColor:[UIColor whiteColor] andLeftImageName:@""];
+    [_saleCateController closeViewController:^(BOOL isFinish){
+        [_saleCateController.view removeFromSuperview];
+        for (UIView *view in [_saleCateController.view subviews]) {
+            [view removeFromSuperview];
+        }
+        
+        _leftCloseItem.customView.hidden = YES;
+        [self.navigationController.navigationBar addSubview:_theSearchBar];
+        [self.navigationController.navigationBar addSubview:_homeShopController.view];
+        [[DHomeLevelController sharedInstance]setupLeftMenuButton];
+        [[DMainRootContrller sharedManager]setOpenDrawerGesture:YES];
+        
+        DHomeAllController *homeAllController = [_navigation.viewControllers objectAtIndex:0];
+        [homeAllController resetLayout];
+        
+        DHomeAllController *allController = [_navigation.viewControllers objectAtIndex:0];
+        [allController openMoreCateGoods:cateId andTitle:title];
+    }];
+}
+
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"NotificationGoodsClicked" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"NotificationGoodsLongPress" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"NotificationStartAnimation" object:nil];
+}
+
+@end

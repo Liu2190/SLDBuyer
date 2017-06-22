@@ -1,0 +1,49 @@
+//
+//  DHomeTabBarView.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-23.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DHomeTabBarView.h"
+#import "DHomeTabBarBlockView.h"
+
+@implementation DHomeTabBarView
+
+- (id)initWithFrame:(CGRect)frame andTitles:(NSArray*)titles {
+    self = [super initWithFrame:frame];
+    self.blocks = [[NSMutableArray alloc]init];
+    
+    float w = self.frame.size.width/titles.count;
+    float h = self.frame.size.height-1;
+    
+    for (int i=0;i<titles.count;i++) {
+        NSDictionary *dict = [titles objectAtIndex:i];
+        CGRect rect = CGRectMake(i*w, 0, w, h);
+        DHomeTabBarBlockView *blockView = [[DHomeTabBarBlockView alloc]initWithFrame:rect andDict:dict];
+        blockView.tag = i;
+        [_blocks addObject:blockView];
+    }
+    
+    [self layoutSubviewsForBlockView];
+    
+    return self;
+}
+
+- (void)layoutSubviewsForBlockView {
+    for (UIView *view in _blocks) {
+        [self addSubview:view];
+    }
+    
+    UIImageView *lineView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"home_tab_line.png"]];
+    [lineView setFrame:CGRectMake(0, self.frame.size.height-1, self.frame.size.width, 1.5)];
+    [self addSubview:lineView];
+    
+    lineView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"home_tab_stand.png"]];
+    [lineView setFrame:CGRectMake((self.frame.size.width-1)/2, 0, 1, self.frame.size.height)];
+    [self addSubview:lineView];
+    
+}
+
+@end

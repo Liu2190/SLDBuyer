@@ -1,0 +1,39 @@
+//
+//  OrderListModel.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-19.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DRecord.h"
+typedef enum _AllOrderType
+{
+	WaitingForPaymentType = 0,      //待付款
+    WaitingForReceivingType = 1,    //待收货
+    FinishedReceivingType = 2,      //已完成
+    DuringRefundType = 3            //退款中
+} OrderType;
+@interface OrderListModel : DRecord
+/**
+ * 订单id
+ */
+@property (nonatomic,retain)NSString *orderID;
+/**
+ * 订单总额
+ */
+@property (nonatomic,retain)NSString *orderAmount;
+/**
+ * 订单类型
+ */
+@property (nonatomic,assign)OrderType orderType;
+/**
+ * 下单时间
+ */
+@property (nonatomic,retain)NSString *orderGenerateDate;
+/**
+ * 订单内商品
+ */
+@property (nonatomic,retain)NSMutableArray *orderGoodsArray;
+
+@end

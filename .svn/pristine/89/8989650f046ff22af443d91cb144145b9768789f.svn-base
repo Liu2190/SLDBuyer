@@ -1,0 +1,18 @@
+//
+//  AddressListModel.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-10.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface AddressListModel : NSObject
+@property (nonatomic,retain)NSString *addressID;
+@property (nonatomic,retain)NSString *userName;
+@property (nonatomic,retain)NSString *addressName;
+@property (nonatomic,assign)BOOL isDefault;
+@property (nonatomic,retain)NSString *phoneNum;
+@property (nonatomic,retain)NSString *tips;
+@end

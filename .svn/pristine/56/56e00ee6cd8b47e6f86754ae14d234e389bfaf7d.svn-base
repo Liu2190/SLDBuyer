@@ -1,0 +1,25 @@
+//
+//  DUtilities.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-21.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+#define IsIOS7 [[UIDevice currentDevice].systemVersion floatValue] >= 7
+#define isIphone5 fabs((double)[[UIScreen mainScreen] bounds].size.height - (double)568) < DBL_EPSILON;
+
+@interface DUtilities : NSObject
+
++ (DUtilities *)sharedInstance;
+
+/**
+ * 获取App版本号
+ */
+- (NSString*)getAppVersionNo;
+
+- (CAKeyframeAnimation*) objectMoveFrom:(CGPoint)fromPoint toPoint:(CGPoint)toPoint duration:(float)durTime;
+
+@end

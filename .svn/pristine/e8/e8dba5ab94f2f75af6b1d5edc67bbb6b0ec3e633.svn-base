@@ -1,0 +1,108 @@
+//
+//  BirthdayView.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-5.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "BirthdayView.h"
+#import "BirthdayPickerView.h"
+@interface BirthdayView()
+{
+    NSMutableArray *_dateArray;
+}
+@property (nonatomic,retain)BirthdayPickerView *birthPicker;
+@end
+@implementation BirthdayView
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code
+        _dateArray = [[NSMutableArray alloc]init];
+        [_dateArray addObject:@"1980-01-01"];
+        self.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4];
+        self.userInteractionEnabled = YES;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tappedCancel)];
+        [self addGestureRecognizer:tap];
+        [self creatButtons];
+    }
+    return self;
+}
+
+- (void)showInView:(UIView *)view
+{
+    [[[UIApplication sharedApplication]keyWindow]addSubview:self];
+}
+-(void)creatButtons
+{
+    self.birthPicker = [[[NSBundle mainBundle]loadNibNamed:@"BirthdayPickerView" owner:self options:nil]lastObject];
+    [self.birthPicker setFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width, 0)];
+    self.birthPicker.userInteractionEnabled = YES ;
+    [self addSubview:self.birthPicker];
+    [self.birthPicker.cancelButton addTarget:self action:@selector(tappedCancel) forControlEvents:UIControlEventTouchUpInside];
+    [self.birthPicker.confirmButton addTarget:self action:@selector(confirmAction) forControlEvents:UIControlEventTouchUpInside];
+    self.birthPicker.datePicker.datePickerMode = UIDatePickerModeDate;
+    NSTimeZone* timeZone = [NSTimeZone timeZoneWithName:@"Asia/Shanghai"];
+    [self.birthPicker.datePicker setTimeZone:timeZone];
+    NSDateFormatter *formatter = [[NSDateFormatter alloc]init];
+    [formatter setDateFormat:@"yyyy MM DD"];
+    [formatter setTimeZone:timeZone];
+    NSDate *minDate = [formatter dateFromString:@"1900 01 01"];
+    NSDate *maxDate = [NSDate date];
+    [self.birthPicker.datePicker setMinimumDate:minDate];
+    [self.birthPicker.datePicker setMaximumDate:maxDate];
+    NSDate *middleDate = [formatter dateFromString:@"1980 01 01"];
+    [self.birthPicker.datePicker setDate:middleDate];
+    self.birthPicker.datePicker.userInteractionEnabled = YES;
+    [UIView animateWithDuration:0.25 animations:^{
+        [self.birthPicker setFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height-264, [UIScreen mainScreen].bounds.size.width, 264)];
+    } completion:^(BOOL finished) {
+    }];
+}
+
+-(void)tappedCancel
+{
+    [UIView animateWithDuration:0.25 animations:^{
+        [self.birthPicker setFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width, 0)];
+        self.alpha = 0;
+    } completion:^(BOOL finished) {
+        if (finished) {
+            [self removeFromSuperview];
+        }
+    }];
+    [self.delegate birthdayViewSelectTime:@""];
+}
+-(void)confirmAction
+{
+    NSDate *thisDate = [self.birthPicker.datePicker date];
+    NSLog(@"date %@",thisDate);
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
+    NSTimeZone* timeZone = [NSTimeZone timeZoneWithName:@"Asia/Shanghai"];
+    [dateFormatter setTimeZone:timeZone];
+    [dateFormatter setDateFormat:@"YYYY-MM-DD-HH-MM-SS"];
+    NSString *dateString=[dateFormatter stringFromDate:thisDate];
+    NSLog(@"1111dateString %@",dateString);
+    [self.delegate birthdayViewSelectTime:dateString];
+    [UIView animateWithDuration:0.25 animations:^{
+        [self.birthPicker setFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width, 0)];
+        self.alpha = 0;
+    } completion:^(BOOL finished) {
+        if (finished) {
+            [self removeFromSuperview];
+        }
+    }];
+}
+/*
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect
+{
+    // Drawing code
+}
+*/
+
+@end

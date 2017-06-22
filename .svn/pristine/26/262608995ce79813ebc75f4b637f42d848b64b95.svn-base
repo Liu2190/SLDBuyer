@@ -1,0 +1,40 @@
+//
+//  DRegisterViewController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-29.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DRegisterViewController.h"
+
+#define top_margin      0
+#define left_margin     10
+
+@implementation DRegisterViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"注册";
+    
+    CGRect mainRect = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    UIScrollView *mainScrollView = [[UIScrollView alloc]initWithFrame:mainRect];
+    [mainScrollView setContentSize:CGSizeMake(mainScrollView.frame.size.width, mainScrollView.frame.size.height+1)];
+    mainScrollView.delegate = self;
+    [self.view addSubview:mainScrollView];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
+    tap.numberOfTouchesRequired = 1;
+    [mainScrollView addGestureRecognizer:tap];
+    
+    CGRect registerRect = CGRectMake(left_margin, top_margin, mainRect.size.width-2*left_margin, mainRect.size.height);
+    _registerView = [[TRegisterView alloc]initWithFrame:registerRect];
+    [_registerView setTargetAction:self];
+    [mainScrollView addSubview:_registerView];
+}
+
+- (void)handleTap {
+    [_registerView cancelKeyboard];
+}
+
+@end

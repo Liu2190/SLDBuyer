@@ -1,0 +1,37 @@
+//
+//  DSaleCateLocalServer.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-6.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DSaleCateLocalServer.h"
+#import "DCate.h"
+#import "TDB.h"
+
+#define TABLE_NAME @"D_Cate"
+
+@implementation DSaleCateLocalServer
+
+- (BOOL)insertWithObject:(DRecord *)record {
+    DCate *cate = (DCate*)record;
+    
+    [db executeUpdate:[self SQL:@"INSERT INTO %@(server_id,title,picUrl,parent_Id) VALUES(?,?,?,?,?)" inTable:TABLE_NAME],cate.serverId,cate.cateTitle,cate.cateImageUrl,cate.parentId];
+    
+	if ([db hadError]) {
+		NSLog(@"Err %d: %@", [db lastErrorCode], [db lastErrorMessage]);
+        return NO;
+	}
+    
+    return YES;
+}
+
+
+
+- (NSMutableArray *)getAllCateRecord {
+    NSMutableArray *allCate = [[NSMutableArray alloc]init];
+    return allCate;
+}
+
+@end

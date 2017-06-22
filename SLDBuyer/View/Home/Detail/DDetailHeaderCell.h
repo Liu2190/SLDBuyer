@@ -1,0 +1,19 @@
+//
+//  DDetailHeaderCell.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-5.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface DDetailHeaderCell : DTableViewCell {
+    UILabel *_titleLabel;
+    UILabel *_sellPriceLabel;
+    UILabel *_stockLabel;
+}
+
+- (void)setDataForCell:(id)data andObje:(id)target;
+
+@end

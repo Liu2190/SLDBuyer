@@ -1,0 +1,16 @@
+//
+//  AccountServer.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-10.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "TBaseServer.h"
+
+@interface AccountServer : TBaseServer
+/**
+ *  获取自提超市的版本号
+ */
+- (void)doGetMarketVersionNumByCallback:(void(^)(NSArray *ret))callback failureCallback:(void(^)(NSString *resp))failureCallback;
+@end

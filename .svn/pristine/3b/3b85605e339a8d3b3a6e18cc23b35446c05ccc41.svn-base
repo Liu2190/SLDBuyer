@@ -1,0 +1,48 @@
+//
+//  CreateAddressView.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "TDbuyerFieldController.h"
+#import "TDbuyerTextView.h"
+@protocol createAddressDelegate
+-(void)AllStatus:(BOOL)status;
+@end
+
+@interface CreateAddressView : UIView
+@property (nonatomic,retain)TDbuyerFieldController *tipsControl;
+@property (nonatomic,retain)TDbuyerFieldController *nameControl;
+@property (nonatomic,retain)TDbuyerFieldController *phoneControl;
+@property (nonatomic,retain)TDbuyerFieldController *detailControl;
+/**
+ *设置代理对象
+ */
+- (void)setTargetAction:(id)target;
+/**
+ *通过验证值来更新UI
+ */
+- (BOOL)updateByTextField:(UITextField*)field;
+- (BOOL)updateByTextView:(UITextView *)textView;
+@property (nonatomic,assign)id delegate;
+@property (weak, nonatomic) IBOutlet UITextField *tipsTextField;
+@property (weak, nonatomic) IBOutlet UITextField *nameTextField;
+@property (weak, nonatomic) IBOutlet UITextField *phoneTextField;
+@property (weak, nonatomic) IBOutlet UITextField *detailAddressTextField;
+@property (weak, nonatomic) IBOutlet UILabel *areaLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *directImage;
+@property (weak, nonatomic) IBOutlet UIButton *showAreaButton;
+@property (weak, nonatomic) IBOutlet UILabel *setDefaultLabel;
+@property (weak, nonatomic) IBOutlet UISwitch *areaSwitch;
+/**
+ *关闭键盘
+ */
+-(void)cancelKeyboard;
+/**
+ *检测textview
+ */
+-(void)setPlaceHolderHiddenWith:(BOOL)status;
+@end

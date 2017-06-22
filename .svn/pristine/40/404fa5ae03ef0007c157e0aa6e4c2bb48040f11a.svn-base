@@ -1,0 +1,83 @@
+//
+//  IndividualAccountController.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-29.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "IndividualAccountController.h"
+#import "AccountLoginCell.h"
+#import "IndividualAccountCell.h"
+
+@interface IndividualAccountController ()<UITableViewDelegate,UITableViewDataSource>
+@property (nonatomic,retain)UITableView *table;
+
+@end
+
+@implementation IndividualAccountController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        self.title = @"个人账户";
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.table = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, self.view.frame.size.height-([[[UIDevice currentDevice]systemVersion]compare:@"7.0"]==NSOrderedAscending ?44.0f:64.0f)) style:UITableViewStylePlain];
+    self.table.delegate = self;
+    self.table.dataSource = self;
+    self.table.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [self.view addSubview:self.table];
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return section == 0?3:1;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifier = @"cell";
+    if(indexPath.section == 0)
+    {
+        IndividualAccountCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+        if(cell == nil)
+        {
+            cell = [[[NSBundle mainBundle]loadNibNamed:@"IndividualAccountCell" owner:self options:nil]lastObject];
+        }
+        return cell;
+    }
+    AccountLoginCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    if(cell == nil)
+    {
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"AccountLoginCell" owner:self options:nil]lastObject];
+    }
+    return cell;
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

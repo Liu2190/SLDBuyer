@@ -1,0 +1,104 @@
+//
+//  DLoginViewController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-29.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DLoginViewController.h"
+#import "TDbuyerFieldController.h"
+#import "DForgetViewController.h"
+#import "TUserCenterServer.h"
+#import "UIViewController+MJPopupViewController.h"
+
+#define control_height 45
+#define speare_size   20
+
+#define top_margin      20
+#define left_margin     10
+
+@implementation DLoginViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"登录";
+    
+    CGRect mainRect = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    UIScrollView *mainScrollView = [[UIScrollView alloc]initWithFrame:mainRect];
+    [mainScrollView setContentSize:CGSizeMake(mainScrollView.frame.size.width, mainScrollView.frame.size.height+1)];
+    [mainScrollView setBackgroundColor:[UIColor whiteColor]];
+    mainScrollView.delegate = self;
+    [self.view addSubview:mainScrollView];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap)];
+    tap.numberOfTouchesRequired = 1;
+    [mainScrollView addGestureRecognizer:tap];
+    
+    CGRect loginRect = CGRectMake(left_margin, top_margin, mainScrollView.frame.size.width-2*left_margin, 180);
+    _loginView = [[TLoginView alloc]initWithFrame:loginRect];
+    [_loginView setTargetAction:self];
+    [mainScrollView addSubview:_loginView];
+    
+    UIBarButtonItem *rightBtnItem = [[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"Login_forget_default.png"] style:UIBarButtonItemStylePlain target:self action:@selector(doForgetPassword)];
+    self.navigationItem.rightBarButtonItem = rightBtnItem;
+    
+}
+
+#pragma mark -
+#pragma mark UITextFieldDelegate
+
+- (void)textFieldDidEndEditing:(UITextField *)textView {
+    [_loginView updateByTextField:textView];
+}
+
+- (void) textFieldDidChange:(UITextField *) textField{
+    [_loginView updateByTextField:textField];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    [_loginView cancelKeyboard];
+}
+
+- (void)handleTap {
+    [_loginView cancelKeyboard];
+}
+
+- (void)doForgetPassword {
+    DForgetViewController *forgetC = [[DForgetViewController alloc]init];
+    [self.navigationController pushViewController:forgetC animated:YES];
+}
+
+/**
+ *  登录按钮被点击,发送登录请求
+ */
+- (void)loginBtnAction:(id)sender {
+    BOOL isYES = YES;
+    
+    NSString *username = [_loginView getUserName];
+    NSString *password = [_loginView getPassword];
+    
+    isYES = [_loginView updateByTextField:[_loginView.accountControl getDbuyerTextField]];
+    if (password.length == 0) isYES = NO;
+    
+    if (!isYES) return;
+    
+    // 发送登录请求
+    [_loginView cancelKeyboard];
+    [[DUtilities sharedInstance]popTarget:self.view];
+    [[TServerFactory getServerInstance:@"TUserCenterServer"]doLoginByUserName:username andPassword:password
+                                                                  andCallback:^(TDbuyerUser*dbuyerUser) {
+                                                                      // [[DUtilities sharedInstance]popMessage:@"登录成功!" target:self.view delayTime:1.f];
+                                                                      [[DUtilities sharedInstance]dismiss];
+                                                                      
+                                                                      [[DUtilities sharedInstance] storeUserInfo:username andPassword:password andUserId:dbuyerUser.serverId];
+                                                                      
+                                                                      [self.loginDelegate doLoginFinish];
+                                                                  } failureCallback:^(NSString *resp) {
+                                                                      [[DUtilities sharedInstance]popMessageError:resp target:self.view delayTime:1.f];
+                                                                  }];
+}
+
+
+
+@end

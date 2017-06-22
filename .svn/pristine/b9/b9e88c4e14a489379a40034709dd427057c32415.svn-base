@@ -1,0 +1,17 @@
+//
+//  FeedBackGroundView.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-27.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface FeedBackGroundView : UIView
+@property (weak, nonatomic) IBOutlet UILabel *tipLabel;
+@property (weak, nonatomic) IBOutlet UITextView *suggestionTextView;
+@property (weak, nonatomic) IBOutlet UIButton *OKButton;
+@property (weak, nonatomic) IBOutlet UITextField *contactLabel;
+
+@end

@@ -1,0 +1,157 @@
+//
+//  EditAddressViewController.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-4.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "EditAddressViewController.h"
+#import "CreateAddressView.h"
+#import "AccountLoginCell.h"
+#import "PickerView.h"
+
+@interface EditAddressViewController ()<UITextFieldDelegate,UITableViewDelegate,PickerViewSelectAreaDelegate>
+{
+    BOOL enable;
+}
+@property (nonatomic,retain)CreateAddressView *createView;
+
+@end
+
+@implementation EditAddressViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        self.title = @"编辑地址";
+        enable = YES;
+        self.model = [[AddressListModel alloc]init];
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.createView = [[[NSBundle mainBundle]loadNibNamed:@"CreateAddressView" owner:self options:nil]lastObject];
+    [self.createView setTargetAction:self];
+    self.createView.frame = CGRectMake(0, 0, self.view.frame.size.width, 400);
+    self.createView.delegate = self;
+    self.createView.tipsTextField.delegate = self;
+    self.createView.nameTextField.delegate = self;
+    self.createView.phoneTextField.delegate = self;
+    self.createView.detailAddressTextField.delegate = self;
+    self.createView.tipsControl.existText = @"送到家";
+    self.createView.nameControl.existText = @"赏金猎人";
+    self.createView.phoneControl.existText = @"13188908909";
+    self.createView.detailControl.existText = @"酒仙桥东路牡丹集团";
+
+    
+    [self.createView.showAreaButton addTarget:self action:@selector(showDetailArea) forControlEvents:UIControlEventTouchUpInside];
+}
+-(void)showDetailArea
+{
+    [self.view endEditing:YES];
+    PickerView *picker = [[PickerView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.width)];
+    picker.delegate = self;
+    [picker showInView:self.view];
+}
+-(void)pickerViewDidSelectedArea:(NSString *)areaName
+{
+    self.createView.areaLabel.text = areaName;
+}
+-(void)doSaveAction
+{
+    
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return indexPath.row == 0?400:120;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifier = @"cell";
+    if(indexPath.section == 0)
+    {
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+        if(cell == nil)
+        {
+            cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
+        }
+        [cell.contentView addSubview:self.createView];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.backgroundColor = [UIColor clearColor];
+        cell.contentView.backgroundColor = [UIColor clearColor];
+        return cell;
+    }
+    AccountLoginCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    if(cell == nil)
+    {
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"AccountLoginCell" owner:self options:nil]lastObject];
+    }
+    cell.tipLabel.text = @"保存";
+    [cell.logOffButton addTarget:self action:@selector(doSaveAction) forControlEvents:UIControlEventTouchUpInside];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    [cell setLogOffButtonStatusWith:enable AndColor:[UIColor redColor]];
+    return cell;
+}
+#pragma mark -
+#pragma mark UITextFieldDelegate
+
+- (void)textFieldDidEndEditing:(UITextField *)textView {
+    [self.createView updateByTextField:textView];
+}
+
+- (void) textFieldDidChange:(UITextField *) textField{
+    [self.createView updateByTextField:textField];
+}
+-(void)textViewDidChange:(UITextView *)textView
+{
+    [self.createView setPlaceHolderHiddenWith:([textView.text length]==0?YES:NO)];
+    [self.createView updateByTextView:textView];
+}
+-(void)textViewDidEndEditing:(UITextView *)textView
+{
+    [self.createView setPlaceHolderHiddenWith:([textView.text length]==0?YES:NO)];
+    [self.createView updateByTextView:textView];
+}
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    [self.view endEditing:YES];
+}
+-(BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [self.view endEditing:YES];
+    return YES;
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+-(void)AllStatus:(BOOL)status
+{
+    enable = status;
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
+}
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

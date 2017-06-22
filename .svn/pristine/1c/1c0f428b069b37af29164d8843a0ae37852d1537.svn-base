@@ -1,0 +1,26 @@
+//
+//  DHomeGoodsAllCell.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-23.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface DHomeGoodsAllCell : DTableViewCell {
+    
+    UILabel *_titleLabe;
+    UIImageView *_moreImageView;
+    
+    UIImageView *_hLineImageView1;
+    UIImageView *_hLineImageView2;
+    UIImageView *_hLineImageView3;
+    
+    UIImageView *_vLineImageView1;
+    UIImageView *_vLineImageView2;
+    
+    NSMutableArray *_viewBlocks;
+}
+
+@end

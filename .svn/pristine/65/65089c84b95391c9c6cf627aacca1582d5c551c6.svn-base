@@ -1,0 +1,76 @@
+//
+//  DefaultMarketViewController.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DefaultMarketViewController.h"
+#import "DefaultTitleView.h"
+#import "DefaultCell.h"
+
+@interface DefaultMarketViewController ()<UITableViewDataSource,UITableViewDelegate>
+@property (nonatomic,retain) DefaultTitleView *dView;
+@property (nonatomic,retain)UITableView *table;
+@end
+
+@implementation DefaultMarketViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        self.title = @"自提超市";
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.dView = [[[NSBundle mainBundle]loadNibNamed:@"DefaultTitleView" owner:self options:nil]lastObject];
+    self.dView.frame = CGRectMake(0, 0, 320, 200);
+    self.table = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, 320, self.view.frame.size.height )];
+    self.table.delegate = self;
+    self.table.dataSource = self;
+    self.table.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.table.tableHeaderView = self.dView;
+    [self.view addSubview:self.table];
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 60.0f;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 5;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+   static NSString *identifier = @"cell";
+    DefaultCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    if(cell == nil)
+    {
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"DefaultCell" owner:self options:nil]lastObject];
+    }
+    return cell;
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

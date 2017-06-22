@@ -1,0 +1,9 @@
+
+#import <UIKit/UIKit.h>
+#import "UIViewController+MMDrawerController.h"
+
+@interface DSideDrawerController : UIViewController <UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView * tableView;
+
+@end

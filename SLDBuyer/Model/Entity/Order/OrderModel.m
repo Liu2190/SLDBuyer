@@ -1,0 +1,37 @@
+//
+//  OrderModel.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-19.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "OrderModel.h"
+
+@implementation OrderModel
+-(id)init
+{
+    self = [super init];
+    self.orderID = [[NSString alloc]init];
+    self.orderAmount = [[NSString alloc]init];
+    self.orderType = 0;
+    self.orderGenerateDate = [[NSString alloc]init];
+    self.orderGoodsArray = [[NSMutableArray alloc]init];
+    self.name = [[NSString alloc]init];
+    self.phone = [[NSString alloc]init];
+    self.address = [[NSString alloc]init];
+    self.deliveryType = [[NSString alloc]init];
+    self.ztTime = [[NSString alloc]init];
+    self.ztMarket = [[NSString alloc]init];
+    self.payment = [[NSString alloc]init];
+    return self;
+}
+-(void)getListInforWith:(NSDictionary *)dict
+{
+    
+}
+-(void)getDetailInforWith:(NSDictionary *)dict
+{
+    
+}
+@end

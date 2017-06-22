@@ -1,0 +1,96 @@
+//
+//  PickerView.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-3.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "PickerView.h"
+#import "AreaPickerView.h"
+@interface PickerView()<UIPickerViewDataSource,UIPickerViewDelegate>
+@property (nonatomic,retain)AreaPickerView *areaPicker;
+@property (nonatomic,retain)NSArray *datas;
+@end
+@implementation PickerView
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code
+        self.datas = @[@"东城区",@"西城区",@"朝阳区",@"崇文区",@"海淀区",@"宣武区",@"石景山区",@"门头沟区",@"丰台区",@"房山区",@"大兴区",@"通州区",@"顺义区",@"平谷区",@"昌平区",@"怀柔区",@"延庆县",@"密云县"];
+        self.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4];
+        self.userInteractionEnabled = YES;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tappedCancel)];
+        [self addGestureRecognizer:tap];
+        [self creatButtons];
+    }
+    return self;
+}
+
+- (void)showInView:(UIView *)view
+{
+    [[[UIApplication sharedApplication]keyWindow]addSubview:self];
+}
+-(void)creatButtons
+{
+    self.areaPicker = [[[NSBundle mainBundle]loadNibNamed:@"AreaPickerView" owner:self options:nil]lastObject];
+    [self.areaPicker setFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width, 0)];
+    self.areaPicker.userInteractionEnabled = YES ;
+    [self addSubview:self.areaPicker];
+    [self.areaPicker.cancelButton addTarget:self action:@selector(tappedCancel) forControlEvents:UIControlEventTouchUpInside];
+    [self.areaPicker.confirmButton addTarget:self action:@selector(confirmAction) forControlEvents:UIControlEventTouchUpInside];
+    
+    self.areaPicker.picker.delegate = self;
+    self.areaPicker.picker.dataSource = self;
+    self.areaPicker.picker.frame = CGRectMake(0, 51, 320, 162);
+    [UIView animateWithDuration:0.25 animations:^{
+        [self.areaPicker setFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height-264, [UIScreen mainScreen].bounds.size.width, 264)];
+    } completion:^(BOOL finished) {
+    }];
+}
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+    return 1;
+}
+-(NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
+{
+    return self.datas.count;
+}
+-(NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+    return [self.datas objectAtIndex:row];
+}
+-(CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component
+{
+    return 45;
+}
+-(void)tappedCancel
+{
+    [UIView animateWithDuration:0.25 animations:^{
+        [self.areaPicker setFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width, 0)];
+        self.alpha = 0;
+    } completion:^(BOOL finished) {
+        if (finished) {
+            [self removeFromSuperview];
+        }
+    }];
+}
+-(void)confirmAction
+{
+    NSString *selectString = [self pickerView:self.areaPicker.picker titleForRow:[self.areaPicker.picker selectedRowInComponent:0] forComponent:0];
+    [self.delegate pickerViewDidSelectedArea:selectString];
+    [self tappedCancel];
+}
+/*
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect
+{
+    // Drawing code
+}
+*/
+
+@end

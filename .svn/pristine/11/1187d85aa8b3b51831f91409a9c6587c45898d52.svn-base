@@ -1,0 +1,40 @@
+//
+//  DefaultCell.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DefaultCell.h"
+
+@implementation DefaultCell
+
+- (void)awakeFromNib
+{
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated
+{
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+-(void)setCellValueWithDict:(NSDictionary *)dict
+{
+    
+}
+-(void)setCellValueWithString:(NSString *)string{
+    if([string isEqual:@"22222"])
+    {
+        [self.addressButton setBackgroundColor:[UIColor blueColor]];
+        self.defaultLabel.hidden = NO;
+    }
+    else
+    {
+        [self.addressButton setBackgroundColor:[UIColor grayColor]];
+        self.defaultLabel.hidden = YES;
+    }
+}
+@end

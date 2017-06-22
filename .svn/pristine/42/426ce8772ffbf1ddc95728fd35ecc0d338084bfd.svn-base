@@ -1,0 +1,85 @@
+//
+//  AccountServer.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-10.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "AccountServer.h"
+
+@implementation AccountServer
+- (void)doGetMarketVersionNumByCallback:(void(^)(NSArray *ret))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/version/queryVersionInfoForFL", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    [item setPostValue:[TimeStamp timeStamp] forKey:@"stamp"];
+    [item setPostValue:[MD5 md5] forKey:@"verify"];
+    [item setPostValue:[[NSUserDefaults standardUserDefaults]objectForKey:@"versionNum"] forKey:@"versionNum"];
+    [item setPostValue:@"2" forKey:@"os_code"];
+    [item setPostValue:[NSString stringWithFormat:@"%d",[UIDevice currentResolution]] forKey:@"size_code"];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetMarketVersionNumRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+- (void)requestFinished:(ASIHTTPRequest *)request {
+    [super requestFinished:request];
+    NSDictionary *requestDictionary = [request userInfo];
+    NSDictionary *packData = [requestDictionary objectForKey:@"packedData"];
+    
+    if ([[packData objectForKey:@"status"]intValue] != 0) {
+        NSString *error = [packData objectForKey:@"msg"];
+        id failureCallback  = [requestDictionary objectForKey:kFailureCallback];
+        ((void(^)(NSString *))failureCallback)(error);
+        
+        return;
+    }
+    
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetAbountDataRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        NSArray *array = [dict objectForKey:@"list"];
+        NSDictionary *dic = [array objectAtIndex:0];
+        NSString *addressStrings = [dic objectForKey:@"content"];
+        NSArray *datas = [addressStrings componentsSeparatedByString:@"dbuyer@"];
+        
+        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(NSArray *))callback)(datas);
+    }
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoCommitSuggestrRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        int statusS = [[dict objectForKey:@"status"] intValue];
+        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(int ))callback)(statusS);
+    }
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetVersionInformationRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        NSArray *infoArray = [dict objectForKey:@"results"];
+        NSDictionary *infoDic = [[NSBundle mainBundle] infoDictionary];
+        NSString *currentVersion = [infoDic objectForKey:@"CFBundleVersion"];
+        if ([infoArray count])
+        {
+            NSDictionary *releaseInfo = [infoArray objectAtIndex:0];
+            NSString *lastVersion = [releaseInfo objectForKey:@"version"];
+            NSString *releaseNotes = [releaseInfo objectForKey:@"releaseNotes"];
+            if (![lastVersion isEqualToString:currentVersion])
+            {
+                NSDictionary *messageDict = [[NSDictionary alloc]initWithObjectsAndKeys:@"1",@"status",lastVersion,@"version",releaseNotes,@"message", nil];
+                id callback  = [requestDictionary objectForKey:kCompleteCallback];
+                ((void(^)(NSDictionary *))callback)(messageDict);
+            }
+            if([lastVersion isEqualToString:currentVersion])
+            {
+                NSDictionary *messageDict = [[NSDictionary alloc]initWithObjectsAndKeys:@"0",@"status",lastVersion,@"version",releaseNotes,@"message", nil];
+                id callback  = [requestDictionary objectForKey:kCompleteCallback];
+                ((void(^)(NSDictionary *))callback)(messageDict);
+            }
+        }
+    }
+}
+@end

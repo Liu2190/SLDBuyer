@@ -1,0 +1,25 @@
+//
+//  CreateAddressView.h
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-30.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface CreateAddressView : UIView
+@property (weak, nonatomic) IBOutlet UITextField *tipsTextField;
+@property (weak, nonatomic) IBOutlet UITextField *nameTextField;
+@property (weak, nonatomic) IBOutlet UITextField *phoneTextField;
+@property (weak, nonatomic) IBOutlet UITextField *detailAddressTextField;
+@property (weak, nonatomic) IBOutlet UILabel *areaLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *directImage;
+@property (weak, nonatomic) IBOutlet UIButton *showAreaButton;
+@property (weak, nonatomic) IBOutlet UILabel *setDefaultLabel;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *segment;
+@property (weak, nonatomic) IBOutlet UILabel *nameTipLabel;
+@property (weak, nonatomic) IBOutlet UILabel *phoneTipLabel;
+@property (weak, nonatomic) IBOutlet UILabel *addressTipLabel;
+
+@end

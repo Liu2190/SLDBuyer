@@ -1,0 +1,31 @@
+//
+//  DHomeLevelController.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-5-21.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DRootViewController.h"
+#import "DHomeDelegate.h"
+#import "DSearchBar.h"
+#import "DSearchGoodsController.h"
+#import "DHomeShopController.h"
+#import "DSaleCateViewController.h"
+#import "DHomeGoodsAllCell.h"
+#import "DBaseHomeLevelController.h"
+
+@interface DHomeLevelController : DBaseHomeLevelController {
+    UIImageView *_animationImageView;
+    
+    
+    // ----animation-----
+    CGRect startAnimationFrame;
+    DHomeGoodsAllCell *homeGoodsAllCell;
+    int homeBlockId;
+    int blockId;
+}
+
++ (id)sharedInstance;
+
+@end

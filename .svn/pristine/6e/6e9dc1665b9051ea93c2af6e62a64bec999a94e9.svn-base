@@ -1,0 +1,217 @@
+//
+//  DSettlementViewController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-17.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DSettlementViewController.h"
+#import "DChecklistElement.h"
+#import "UIButton+Extensions.h"
+#import "DGoodsItemElement.h"
+#import "DZTElement.h"
+#import "DOrderConfirmController.h"
+#import "DShopFreightElement.h"
+#import "DGoods.h"
+
+@implementation DSettlementViewController
+
+- (id)initWithGoods:(NSArray*)goods {
+    self = [super init];
+    self.goods = goods;
+    
+    QRootElement *root = [[QRootElement alloc] init];
+    root.grouped = YES;
+    root.title = @"结算中心";
+    self.root = root;
+    
+    return self;
+}
+
+- (id)init {
+    self = [super init];
+    
+    QRootElement *root = [[QRootElement alloc] init];
+    root.grouped = YES;
+    root.title = @"结算中心";
+    self.root = root;
+    
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    //
+    QSection *consigneeSection = [[QSection alloc]init];
+    [self.root addSection:consigneeSection];
+    [consigneeSection addElement:[self genConsigneeRootElement]];
+    
+    //
+    QSelectSection *deliveryWaySection = [[QSelectSection alloc]initWithItems:[NSArray arrayWithObjects:@"第三方快递", @"自提", nil] selected:0 title:@"配送方式"];
+    [deliveryWaySection setKey:@"DeliveryWaySection"];
+    [self.root addSection:deliveryWaySection];
+    
+    QSelectItemElement *qtElement = [deliveryWaySection.elements objectAtIndex:0];
+    qtElement.onSelected = ^(){
+        [deliveryWaySection.elements removeLastObject];
+        
+        float payMoney = [self calculatePayMoney:0];
+        QLabelElement *payLabelElement = (QLabelElement*)[self.root elementWithKey:@"PayPriceElement"];
+        [payLabelElement setValue:[NSString stringWithFormat:@"￥%.2f",payMoney]];
+        
+        DShopFreightElement *shopFreightElement = (DShopFreightElement*)[self.root elementWithKey:@"TransPriceElement"];
+        shopFreightElement.plusValue = 10.00f;
+        
+        [self.quickDialogTableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationFade];
+        [self.quickDialogTableView reloadSections:[NSIndexSet indexSetWithIndex:3] withRowAnimation:UITableViewRowAnimationNone];
+    };
+    
+    QRadioElement *ztElement = [deliveryWaySection.elements objectAtIndex:1];
+    ztElement.onSelected = ^(){
+        DZTElement *labelElement = [[DZTElement alloc]init];
+        [deliveryWaySection addElement:labelElement];
+        
+        float payMoney = [self calculatePayMoney:1];
+        QLabelElement *payLabelElement = (QLabelElement*)[self.root elementWithKey:@"PayPriceElement"];
+        [payLabelElement setValue:[NSString stringWithFormat:@"￥%.2f",payMoney]];
+        
+        DShopFreightElement *shopFreightElement = (DShopFreightElement*)[self.root elementWithKey:@"TransPriceElement"];
+        shopFreightElement.plusValue = 0.00f;
+        
+        [self.quickDialogTableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationFade];
+        [self.quickDialogTableView reloadSections:[NSIndexSet indexSetWithIndex:3] withRowAnimation:UITableViewRowAnimationNone];
+    };
+    
+
+    //
+    QSection *checklistSection = [[QSection alloc]init];
+    [self.root addSection:checklistSection];
+    DChecklistElement *checklistElement_ = [[DChecklistElement alloc]initWithTitle:@"商品清单" Value:@""];
+    __weak DChecklistElement *checklistElement = checklistElement_;
+    [checklistSection addElement:checklistElement];
+    checklistElement.onSelected = ^(){
+        if (checklistElement.isSelected) {
+            for (int i=0;i<self.goods.count;i++) {
+                DGoods *goods = [self.goods objectAtIndex:i];
+                DGoodsItemElement *itemElement = [[DGoodsItemElement alloc]initWithGoods:goods];
+                [itemElement setKey:[NSString stringWithFormat:@"itemElement_%i",i]];
+                [checklistSection addElement:itemElement];
+            }
+            [self.quickDialogTableView reloadSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationNone];
+        } else {
+            [checklistSection.elements removeObjectsInRange:NSMakeRange(1,checklistSection.elements.count-1)];
+            [self.quickDialogTableView reloadSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationNone];
+        }
+    };
+    
+    //
+    QSection *priceSection = [[QSection alloc]init];
+    [self.root addSection:priceSection];
+    NSString *totlaPrice = [NSString stringWithFormat:@"￥%.2f",[self calculateTotalPrice]];
+    QLabelElement *totalPriceElement = [[QLabelElement alloc]initWithTitle:@"商品总价" Value:totlaPrice];
+    [priceSection addElement:totalPriceElement];
+    
+    DShopFreightElement *transPriceElement = [[DShopFreightElement alloc]init];
+    [transPriceElement setKey:@"TransPriceElement"];
+    [priceSection addElement:transPriceElement];
+    
+    NSString *payMoney = [NSString stringWithFormat:@"￥%.2f",[self calculatePayMoney:0]];
+    QLabelElement *payPriceElement = [[QLabelElement alloc]initWithTitle:@"应付总额" Value:payMoney];
+    [payPriceElement setKey:@"PayPriceElement"];
+    [payPriceElement setValueColor:[UIColor redColor]];
+    [priceSection addElement:payPriceElement];
+    
+    //
+    QSection *submitOrderSection = [[QSection alloc]init];
+    [self.root addSection:submitOrderSection];
+    QButtonElement *submitOrderElement = [[QButtonElement alloc]initWithTitle:@"提交订单"];
+    [submitOrderElement setKey:@"PayBtnElement"];
+    submitOrderElement.appearance.buttonAlignment = NSTextAlignmentCenter;
+    [submitOrderElement setControllerAction:@"doSubmitOrderAction"];
+    submitOrderElement.appearance.actionColorEnabled = [UIColor colorWithRed:23./255 green:109./255 blue:250./255. alpha:1.];
+    [submitOrderSection addElement:submitOrderElement];
+}
+
+- (void)doSubmitOrderAction {
+    DOrderConfirmController *orderConfirmController = [[DOrderConfirmController alloc]init];
+    [self.navigationController pushViewController:orderConfirmController animated:YES];
+}
+
+- (QRootElement*)genConsigneeRootElement {
+    QRootElement *root = [[QRootElement alloc] init];
+    root.title = @"请选择收货人";
+    root.grouped = YES;
+    [root setControllerName:@"DConsigneeController"];
+    
+    QSection *homeAddressSection = [[QSection alloc]init];
+    [root addSection:homeAddressSection];
+    QLabelElement *homeAddressElement = [[QLabelElement alloc]initWithTitle:@"家庭地址" Value:@"home"];
+    [homeAddressSection addElement:homeAddressElement];
+    
+    QSection *workAddressSection = [[QSection alloc]init];
+    [root addSection:workAddressSection];
+    QLabelElement *workAddressElement = [[QLabelElement alloc]initWithTitle:@"工作地址" Value:@"work"];
+    [workAddressSection addElement:workAddressElement];
+    
+    return root;
+}
+
+- (void)setDefaultNavigationStyle {
+    UIImage * imageNormal = [UIImage imageNamed:@"Nav_Back_Green.png"];
+    
+    UIButton * button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.exclusiveTouch = YES;
+    [button addTarget:self action:@selector(leftButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    [button setBackgroundImage:imageNormal forState:UIControlStateNormal];
+    
+    button.frame = CGRectMake(0.0, 0.0, 3*imageNormal.size.width/5, 3*imageNormal.size.height/5);
+    [button setHitTestEdgeInsets:UIEdgeInsetsMake(-10, -10, -10, -30)];
+    UIBarButtonItem * barButtonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
+    self.navigationItem.leftBarButtonItem= barButtonItem;
+    
+    
+    UIColor *navBgColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1.0];
+    [self.navigationController.navigationBar setBarTintColor:navBgColor];
+    self.navigationController.navigationBar.translucent = NO;
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label.text = @"结算中心";
+    label.backgroundColor = [UIColor clearColor];
+    label.font = [UIFont boldSystemFontOfSize:20.0];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.textColor = [UIColor colorWithRed:114./255.0 green:178.0/255 blue:110/255. alpha:1.0];
+    self.navigationItem.titleView = label;
+    [label sizeToFit];
+}
+
+- (void)leftButtonAction {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (float)calculateTotalPrice {
+    float totalPrice = .0f;
+    
+    for (DGoods *goods in _goods) {
+        totalPrice += [self calculateLittlePrice:goods];
+    }
+    
+    return totalPrice;
+}
+
+- (float)calculateLittlePrice:(DGoods*)goods {
+    float littlePrice = goods.sellPrice * goods.goodsNum;
+    return littlePrice;
+}
+
+- (float)calculatePayMoney:(int)selectIndex {
+    float payMoney = [self calculateTotalPrice];
+    
+    if (selectIndex == 0)payMoney += (10 - 2); // 第三方
+    else if (selectIndex == 1) payMoney -=  2; // 自提
+    
+    return payMoney;
+}
+
+@end

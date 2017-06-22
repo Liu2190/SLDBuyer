@@ -1,0 +1,111 @@
+//
+//  AboutUsServer.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-6-9.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "AboutUsServer.h"
+
+@implementation AboutUsServer
+- (void)doGetAbountDataByCallback:(void (^)(NSArray *))callback failureCallback:(void (^)(NSString *))failureCallback {
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/userHelpView/queryAfter?type=4", serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetAbountDataRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+-(void)doCommitSuggestionWithContent:(NSString *)content AndContact:(NSString *)contact callback:(void (^)(int status))callback failureCallback:(void (^)(NSString *))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@interface/userHelpView/insertToView",serviceHost]];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    item.stringEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingMacChineseSimp);
+    [item setPostValue:verionNum forKey:@"version"];
+    [item setPostValue:@"0" forKey:@"type"];
+    [item setPostValue:content forKey:@"content"];
+    [item setPostValue:contact forKey:@"contact"];
+    
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoCommitSuggestrRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+-(void)doGetVersionThingsByCallback:(void(^)(NSDictionary *ret))callback failureCallback:(void(^)(NSString *resp))failureCallback
+{
+    NSURL *url = [NSURL URLWithString:@"http://itunes.apple.com/lookup?id=764279408"];
+    ASIFormDataRequest *item = [[ASIFormDataRequest alloc] initWithURL:url];
+    NSArray *objects = @[[callback copy] , [failureCallback copy] ];
+    NSArray *keys = @[kCompleteCallback, kFailureCallback];
+    NSMutableDictionary *requestInfo = [NSMutableDictionary dictionaryWithObjects:objects forKeys:keys];
+    [requestInfo addEntriesFromDictionary:[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInt:DoGetVersionInformationRequest],USER_INFO_KEY_TYPE, nil]];
+    [item setUserInfo:requestInfo];
+    [self.requestQueue addOperation:item];
+    [self start];
+}
+- (void)requestFinished:(ASIHTTPRequest *)request {
+    [super requestFinished:request];
+    NSDictionary *requestDictionary = [request userInfo];
+    NSDictionary *packData = [requestDictionary objectForKey:@"packedData"];
+    
+    if ([[packData objectForKey:@"status"]intValue] != 0) {
+        NSString *error = [packData objectForKey:@"msg"];
+        id failureCallback  = [requestDictionary objectForKey:kFailureCallback];
+        ((void(^)(NSString *))failureCallback)(error);
+        
+        return;
+    }
+    
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetAbountDataRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        NSArray *array = [dict objectForKey:@"list"];
+        NSDictionary *dic = [array objectAtIndex:0];
+        NSString *addressStrings = [dic objectForKey:@"content"];
+        NSArray *datas = [addressStrings componentsSeparatedByString:@"dbuyer@"];
+        
+        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(NSArray *))callback)(datas);
+    }
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoCommitSuggestrRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        int statusS = [[dict objectForKey:@"status"] intValue];
+        id callback  = [requestDictionary objectForKey:kCompleteCallback];
+        ((void(^)(int ))callback)(statusS);
+    }
+    if ([[requestDictionary objectForKey:USER_INFO_KEY_TYPE]floatValue] == DoGetVersionInformationRequest) {
+        NSDictionary *dict  = [requestDictionary objectForKey:@"packedData"];
+        NSArray *infoArray = [dict objectForKey:@"results"];
+        NSDictionary *infoDic = [[NSBundle mainBundle] infoDictionary];
+        NSString *currentVersion = [infoDic objectForKey:@"CFBundleVersion"];
+        if ([infoArray count])
+        {
+            NSDictionary *releaseInfo = [infoArray objectAtIndex:0];
+            NSString *lastVersion = [releaseInfo objectForKey:@"version"];
+            NSString *releaseNotes = [releaseInfo objectForKey:@"releaseNotes"];
+            if (![lastVersion isEqualToString:currentVersion])
+            {
+                NSDictionary *messageDict = [[NSDictionary alloc]initWithObjectsAndKeys:@"1",@"status",lastVersion,@"version",releaseNotes,@"message", nil];
+                id callback  = [requestDictionary objectForKey:kCompleteCallback];
+                ((void(^)(NSDictionary *))callback)(messageDict);
+            }
+            if([lastVersion isEqualToString:currentVersion])
+            {
+                NSDictionary *messageDict = [[NSDictionary alloc]initWithObjectsAndKeys:@"0",@"status",lastVersion,@"version",releaseNotes,@"message", nil];
+                id callback  = [requestDictionary objectForKey:kCompleteCallback];
+                ((void(^)(NSDictionary *))callback)(messageDict);
+            }
+        }
+    }
+}
+
+@end

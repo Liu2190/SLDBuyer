@@ -1,0 +1,143 @@
+//
+//  IndividualAccountController.m
+//  SLDBuyer
+//
+//  Created by liuxiaodan on 14-5-29.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "IndividualAccountController.h"
+#import "AccountLoginCell.h"
+#import "IndividualAccountCell.h"
+#import "GenderView.h"
+#import "BirthdayView.h"
+@interface IndividualAccountController ()<UITableViewDelegate,UITableViewDataSource,genderDelegate,birthdayViewDelegate>
+
+@property (nonatomic,retain)UITableView *table;
+@property (nonatomic,retain)IndividualAccountCell *inCell;
+
+@end
+
+@implementation IndividualAccountController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        self.title = @"个人账户";
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.view.backgroundColor = [UIColor colorWithRed:250.0/255.0 green:249.0/255.0 blue:246.0/255.0 alpha:1];
+    self.inCell = [[[NSBundle mainBundle]loadNibNamed:@"IndividualAccountCell" owner:self options:nil]lastObject];
+    self.table = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, self.view.frame.size.height-([[[UIDevice currentDevice]systemVersion]compare:@"7.0"]==NSOrderedAscending ?44.0f:64.0f)) style:UITableViewStylePlain];
+    self.table.backgroundColor = [UIColor clearColor];
+    self.table.delegate = self;
+    self.table.dataSource = self;
+    self.table.separatorStyle = UITableViewCellSeparatorStyleNone;
+    UIView *v = [[UIView alloc]initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 50)];
+    v.backgroundColor = [UIColor clearColor];
+    self.table.tableHeaderView = v;
+    [self.view addSubview:self.table];
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return indexPath.section==0?270:100;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifier = @"cell";
+    if(indexPath.section == 0)
+    {
+        self.inCell = [tableView dequeueReusableCellWithIdentifier:identifier];
+        if(self.inCell == nil)
+        {
+            self.inCell = [[[NSBundle mainBundle]loadNibNamed:@"IndividualAccountCell" owner:self options:nil]lastObject];
+        }
+        self.inCell.selected = NO;
+        self.inCell.selectionStyle = UITableViewCellSelectionStyleNone;
+        [self.inCell.genderButton addTarget:self action:@selector(showGenderView) forControlEvents:UIControlEventTouchUpInside];
+        [self.inCell.birthButton addTarget:self action:@selector(showBirthView) forControlEvents:UIControlEventTouchUpInside];
+        return self.inCell;
+    }
+    AccountLoginCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    if(cell == nil)
+    {
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"AccountLoginCell" owner:self options:nil]lastObject];
+    }
+    return cell;
+}
+-(void)showGenderView
+{
+    float hudu = 3.141593/2;
+    [UIView animateWithDuration:0.2 delay:0 options:0 animations: ^{
+        self.inCell.genderImage.transform = CGAffineTransformRotate(self.inCell.genderImage.transform, hudu);
+    } completion: ^(BOOL completed) {
+        GenderView *gender = [[GenderView alloc]init];
+        gender.delegate = self;
+        [gender showInView:self.view];
+    }];
+    
+}
+-(void)showBirthView
+{
+    float hudu = 3.141593/2;
+    [UIView animateWithDuration:0.2 delay:0 options:0 animations: ^{
+        self.inCell.birthImage.transform = CGAffineTransformRotate(self.inCell.birthImage.transform, hudu);
+    } completion: ^(BOOL completed) {
+        BirthdayView *birth = [[BirthdayView alloc]init];
+        birth.delegate = self;
+        [birth showInView:self.view];
+    }];
+    
+}
+-(void)selectGenderWithButtonIndex:(NSInteger)index
+{
+    //0代表男，1代表女
+    float hudu = -3.141593/2;
+    [UIView animateWithDuration:0.2 delay:0 options:0 animations: ^{
+        self.inCell.genderImage.transform = CGAffineTransformRotate(self.inCell.genderImage.transform, hudu);
+    } completion: ^(BOOL completed) {
+        
+    }];
+}
+-(void)birthdayViewSelectTime:(NSString *)time
+{
+    float hudu = -3.141593/2;
+    [UIView animateWithDuration:0.2 delay:0 options:0 animations: ^{
+        self.inCell.birthImage.transform = CGAffineTransformRotate(self.inCell.birthImage.transform, hudu);
+    } completion: ^(BOOL completed) {
+        
+    }];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

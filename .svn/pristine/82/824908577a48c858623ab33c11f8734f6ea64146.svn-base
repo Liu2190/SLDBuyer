@@ -1,0 +1,111 @@
+//
+//  DBHandler.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-6.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DBHandler.h"
+#import "DVersion.h"
+
+#import "DVersionServer.h"
+#import "DSaleCateServer.h"
+#import "DShopCarServer.h"
+
+@implementation DBHandler
+
++ (DBHandler *)sharedInstance {
+    static DBHandler *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[DBHandler alloc] init];
+    });
+    
+    return sharedInstance;
+}
+
+/**
+ * 实例生产环境
+ */
+- (void)buildProductSetting {
+    NSMutableArray *versions = [[NSMutableArray alloc]init];
+    
+    // 商品分类版本对象
+    DVersion *cateVersion = [[DVersion alloc]init];
+    cateVersion.dbName = @"D_CATE";
+    cateVersion.version = @"0";
+    cateVersion.lastUpdateTime = [[DUtilities sharedInstance]stringLongFromDate:[NSDate date]];
+    cateVersion.isSys = 0;
+    cateVersion.desc = @"商品分类版本表";
+    
+    // 购物车版本对象
+    DVersion *shopCarVersion = [[DVersion alloc]init];
+    shopCarVersion.dbName = @"D_SHOPCAR";
+    shopCarVersion.version = @"0";
+    shopCarVersion.lastUpdateTime = [[DUtilities sharedInstance]stringLongFromDate:[NSDate date]];
+    shopCarVersion.isSys = 0;
+    shopCarVersion.desc = @"购物车版本表";
+    
+    [versions addObject:cateVersion];
+    [versions addObject:shopCarVersion];
+    
+    [[TServerFactory getServerInstance:@"DVersionServer"]insertObjectsWithRecords:versions];
+}
+
+- (void)startUpdateVersionData {
+    NSArray *versions = [[TServerFactory getServerInstance:@"DVersionServer"]selectAllRecord];
+    if (versions.count == 0) [self buildProductSetting];
+    
+    #warning 调用后台接口获取各版本号信息,把获取的版本信息同步到版本表中
+    
+    #warning 同步版本成功后调用[self synServerByVersions:versions]开始同步业务数据
+    [self synServerByVersions:versions];
+}
+
+- (BOOL)isSynServerByDbName:(NSString *)dbName {
+    DVersion *version = (DVersion*)[[TServerFactory getServerInstance:@"DVersionServer"]
+                                    selectRecordByDbName:dbName];
+    
+    if (version.isSys == 1) return NO; // 1:不需要更新 反之更新
+    
+    return YES;
+}
+
+- (void)synServerByVersions:(NSArray*)versions {
+    for (DVersion *version in versions) {
+        BOOL isSyn = [self isSynServerByDbName:version.dbName];
+        if (!isSyn) continue;
+        
+        if ([version.dbName isEqualToString:@"D_CATE"]) {
+            [self synServerWithGoodsCate];
+        }
+        
+        if ([version.dbName isEqualToString:@"D_SHOPCAR"]) { // 购物车
+            [self synServerWithShopCar];
+        }
+    }
+}
+
+/**
+ * 同步商品分类数据
+ */
+- (void)synServerWithGoodsCate {
+    [[TServerFactory getServerInstance:@"DSaleCateServer"]getAllCateData:^(NSArray *datas) {
+        [[TServerFactory getServerInstance:@"DSaleCateServer"]insertAllCate:datas];
+        
+        // 更新Version标记
+        [[TServerFactory getServerInstance:@"DVersionServer"]updateSetViersion:@"D_CATE" andSyn:@"1"];
+    } failureCallback:^(NSString *resp) {
+        
+    }];
+}
+
+/**
+ * 同步购物车数据
+ */
+- (void)synServerWithShopCar {
+    // [TServerFactory getServerInstance:@"DShopCarServer"]
+}
+
+@end

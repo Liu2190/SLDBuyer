@@ -1,0 +1,21 @@
+//
+//  DGoodDetailForm.h
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-5.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DRecord.h"
+
+@interface DGoodDetailForm : DRecord
+
+@property (nonatomic,strong)NSString *title;
+@property (nonatomic,strong)NSString *sellPrice;
+@property (nonatomic,assign)int stock;
+
+@property (nonatomic,strong)NSMutableArray *detailData;
+
+
+
+@end

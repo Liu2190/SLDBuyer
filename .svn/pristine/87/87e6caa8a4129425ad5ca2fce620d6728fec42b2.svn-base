@@ -1,0 +1,10 @@
+
+#import <UIKit/UIKit.h>
+#import "DLeftMenuDelegate.h"
+#import "UIViewController+MMDrawerController.h"
+
+@interface DSideDrawerController : UIViewController <UITableViewDataSource,UITableViewDelegate,DLeftMenuDelegate>
+
+@property (nonatomic, strong) UITableView * tableView;
+
+@end

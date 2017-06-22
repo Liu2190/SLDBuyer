@@ -1,0 +1,31 @@
+//
+//  DOrderConfirmController.m
+//  SLDBuyer
+//
+//  Created by Dbuyer mac1 on 14-6-13.
+//  Copyright (c) 2014年 shanglin. All rights reserved.
+//
+
+#import "DOrderConfirmController.h"
+#import "DMainRootContrller.h"
+
+@implementation DOrderConfirmController
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"确认订单";
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [[DMainRootContrller sharedManager]updateStatuBarColorByStyle:UIStatusBarStyleLightContent];
+}
+
+- (void)leftButtonAction {
+    [[DMainRootContrller sharedManager]updateStatuBarColorByStyle:UIStatusBarStyleDefault];
+    [super leftButtonAction];
+}
+
+
+@end
